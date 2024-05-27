@@ -6,13 +6,14 @@
 
 class RBM {
     public:
-        RBM(int n_visible, int n_hidden);
+        RBM(int v_num, int h_num);
         ~RBM();
+        double energy_calc();
     private:
-        int* visible_variable;
-        int* hidden_variable;
-        int n_visible;
-        int n_hidden;
+        int* v;
+        int* h;
+        int v_num;
+        int h_num;
         double** W;
         double* b;
         double* c;
