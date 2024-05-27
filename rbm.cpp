@@ -1,6 +1,6 @@
 #include "rbm.h"
 
-RBM::RBM(int n_visible, int n_hidden, int mode){
+RBM::RBM(int n_visible, int n_hidden){
     // 変数の用意
     this->n_visible = n_visible;
     this->n_hidden = n_hidden;
@@ -12,7 +12,6 @@ RBM::RBM(int n_visible, int n_hidden, int mode){
     }
     this->b = new double[n_hidden];
     this->c = new double[n_visible];
-    this->mode = mode;
 
     std::random_device rd;
     gen = std::mt19937(rd()); // 乱数生成器の初期化
