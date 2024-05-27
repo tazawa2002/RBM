@@ -22,7 +22,7 @@ class RBM {
         std::mt19937 gen;
         std::uniform_real_distribution<double> dis;
         double random_num();
-}
+};
 
 #endif
 
