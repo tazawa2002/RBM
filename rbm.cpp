@@ -3,7 +3,9 @@
 // コンストラクタ
 RBM::RBM(int v_num, int h_num){
     // 変数の用意
-    this->totalStates = pow(2,(v_num + h_num));
+    this->vStates = pow(2,v_num);
+    this->hStates = pow(2,h_num);
+    this->totalStates = this->vStates*this->hStates;
     this->v.resize(v_num);
     this->h.resize(h_num);
     this->W.resize(v_num);
@@ -13,7 +15,9 @@ RBM::RBM(int v_num, int h_num){
     this->b.resize(v_num);
     this->c.resize(h_num);
     this->p_distr.resize(this->totalStates);
+    this->p_distr_v.resize(this->vStates);
     this->histgram.resize(this->totalStates);
+    this->histgram_v.resize(this->vStates);
 
     std::random_device rd;
     gen = std::mt19937(rd()); // 乱数生成器の初期化
@@ -86,6 +90,39 @@ void RBM::p_distr_calc(){
     }
 }
 
+// 確率を計算
+void RBM::p_distr_v_calc(){
+    int i,j,k;
+    double Z = 0;
+
+    // 配列の初期化
+    for(i=0;i<vStates;i++){
+        p_distr_v[i] = 0;
+    }
+
+    // すべての状態の確率を求める
+    for(k=0;k<vStates;k++){
+        // 状態を設定
+        for(i=0;i<v.size();i++){
+            v[i] = (k >> i)&1;
+        }
+        for(i=0;i<hStates;i++){
+            for(j=0;j<h.size();j++){
+                h[j] = (i >> j)&1;
+            }
+            p_distr_v[k] += exp(-energy_calc());
+        }
+    }
+
+    for(i=0;i<this->vStates;i++){
+        Z += p_distr_v[i];
+    }
+
+    for(i=0;i<vStates;i++){
+        p_distr_v[i] = p_distr_v[i] / Z;
+    }
+}
+
 // 可視層の状態を更新
 void RBM::update_v(){
     int i, j;
@@ -129,6 +166,9 @@ void RBM::update_h(){
 // サンプリング
 void RBM::sampling(int num){
     int i, j;
+    for(i=0;i<vStates;i++){
+        histgram_v[i] = 0;
+    }
     for(i=0;i<totalStates;i++){
         histgram[i] = 0;
     }
@@ -145,6 +185,7 @@ void RBM::sampling(int num){
         }
         // print();
         histgram[state_num()] += 1;
+        histgram_v[stateV()] += 1;
     }
 }
 
@@ -181,4 +222,79 @@ int RBM::state_num(){
         state += h[i] * pow(2,i+v.size());
     }
     return state;
+}
+
+// データを生成する関数
+void RBM::dataGen(int num){
+    int i,j;
+    FILE *datafile;
+    
+    // ヒストグラムを初期化
+    for(i=0;i<vStates;i++){
+        histgram_v[i] = 0;
+    }
+    for(i=0;i<totalStates;i++){
+        histgram[i] = 0;
+    }
+
+    // バーンイン時間
+    for(i=0;i<1000;i++){
+        update_v();
+        update_h();
+    }
+
+    datafile = fopen("./data/data.dat", "w");
+
+    // データ生成のループ
+    for(i=0;i<num;i++){
+        for(j=0;j<1;j++){
+            update_v();
+            update_h();
+        }
+        fprintf(datafile, "%d\n", stateV());
+        histgram[state_num()] += 1;
+        histgram_v[stateV()] += 1;
+    }
+    fclose(datafile);
+}
+
+// データを読み込む関数
+void RBM::dataRead(int num){
+    int i, j, x;
+    FILE *datafile;
+    traindatanum = num;
+    traindata.resize(num);
+    for(i=0;i<num;i++){
+        traindata[i].resize(v.size());
+    }
+    datafile = fopen("./data/data.dat", "r");
+    for(i=0;i<num;i++){
+        fscanf(datafile, "%d", &x);
+        setV(x);
+        for(j=0;j<v.size();j++){
+            traindata[i][j] = v[j];
+        }
+    }
+    fclose(datafile);
+}
+
+void RBM::train(){
+
+}
+
+// 可視変数の状態を2進数で返す関数
+int RBM::stateV(){
+    int i;
+    int num = 0;
+    for(i=0;i<v.size();i++){
+        num += pow(2,i)*v[i];
+    }
+    return num;
+}
+
+void RBM::setV(int num){
+    int i;
+    for(i=0;i<v.size();i++){
+        v[i] = (num >> i) & 1;
+    }
 }
