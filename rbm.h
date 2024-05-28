@@ -1,4 +1,5 @@
 // rbm.h 制限ボルツマンマシンのヘッダーファイル
+#include <iostream>
 #include <vector>
 #include <random>
 #include <cmath>

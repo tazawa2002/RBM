@@ -58,11 +58,18 @@ double RBM::energy_calc(){
 
 // 確率を計算
 void RBM::p_distr_calc(){
-    int i,j;
+    int i,j,k;
     double Z = 0;
 
+    // すべての状態の確率を求める
     for(i=0;i<totalStates;i++){
-        // setX(i); 状態を設定
+        // 状態を設定
+        for(k=0;k<v.size();k++){
+            v[i] = (totalStates >> k)&1;
+        }
+        for(k=0;k<h.size();k++){
+            h[i] = (totalStates >> (k+v.size()))&1;
+        }
         p_distr[i] = exp(-energy_calc());
     }
     for(i=0;i<this->totalStates;i++){
@@ -70,5 +77,5 @@ void RBM::p_distr_calc(){
     }
     for(i=0;i<totalStates;i++){
         p_distr[i] = p_distr[i] / Z;
-    }   
+    }
 }
