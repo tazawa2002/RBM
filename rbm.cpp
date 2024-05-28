@@ -107,9 +107,9 @@ void RBM::update_h(){
     double lambda;
     double p, u;
     for(j=0;j<h.size();j++){
-        lambda = c[i];
+        lambda = c[j];
         for(i=0;i<v.size();i++){
-            lambda += W[i][j]*v[j];
+            lambda += W[i][j]*v[i];
         }
         p = sig(lambda);
         u = random_num();
@@ -170,10 +170,10 @@ int RBM::state_num(){
     int i;
     int state = 0;
     for(i=0;i<v.size();i++){
-        state += v[i] << i;
+        state += v[i] * pow(2,i);
     }
     for(i=0;i<h.size();i++){
-        state += h[i] << (i+v.size());
+        state += h[i] * pow(2,i+v.size());
     }
     return state;
 }
