@@ -16,13 +16,21 @@ class RBM {
         int totalStates;
         double energy_calc();
         void p_distr_calc();
+        void update_v();
+        void update_h();
+        void sampling(int num);
         vector<double> p_distr;
+        vector<int> histgram;
     private:
         vector<int> v;
         vector<int> h;
         vector< vector<double> > W;
         vector<double> b;
         vector<double> c;
+        double sig(double x);
+
+        void print();
+        int state_num();
 
         // 乱数生成器のメンバ変数
         std::mt19937 gen;

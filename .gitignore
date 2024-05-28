@@ -4,3 +4,5 @@
 /data/*
 /main.o
 /rbm.o
+/main
+/graph.pdf
