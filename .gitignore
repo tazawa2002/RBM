@@ -2,7 +2,7 @@
 /bm.h
 /.vscode
 /data/*
-/main.o
-/rbm.o
+/*.o
 /main
-/graph.pdf
+/learn
+/*.pdf
