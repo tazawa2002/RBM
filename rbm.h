@@ -20,7 +20,7 @@ class RBM {
     private:
         vector<int> v;
         vector<int> h;
-        vector<vector<double>> W;
+        vector< vector<double> > W;
         vector<double> b;
         vector<double> c;
 

@@ -1,2 +1,6 @@
 /bm.cpp
 /bm.h
+/.vscode
+/data/*
+/main.o
+/rbm.o
