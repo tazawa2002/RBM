@@ -52,7 +52,12 @@ double RBM::energy_calc(){
         for(j=0;j<this->h.size();j++){
             energy -= W[i][j]*v[i]*h[j];
         }
-        energy -= b[i]*v[i] + c[i]*h[i];
+    }
+    for(i=0;i<this->v.size();i++){
+        energy -= b[i]*v[i];
+    }
+    for(j=0;j<this->h.size();j++){
+        energy -= c[j]*h[j];
     }
     return energy;
 }
@@ -63,15 +68,15 @@ void RBM::p_distr_calc(){
     double Z = 0;
 
     // すべての状態の確率を求める
-    for(i=0;i<totalStates;i++){
+    for(k=0;k<totalStates;k++){
         // 状態を設定
-        for(k=0;k<v.size();k++){
-            v[k] = (i >> k)&1;
+        for(i=0;i<v.size();i++){
+            v[i] = (k >> i)&1;
         }
-        for(k=0;k<h.size();k++){
-            h[k] = (i >> (k+v.size()))&1;
+        for(j=0;j<h.size();j++){
+            h[j] = (k >> (j+v.size()))&1;
         }
-        p_distr[i] = exp(-energy_calc());
+        p_distr[k] = exp(-energy_calc());
     }
     for(i=0;i<this->totalStates;i++){
         Z += p_distr[i];
