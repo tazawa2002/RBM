@@ -3,7 +3,7 @@
 // コンストラクタ
 RBM::RBM(int v_num, int h_num){
     // 変数の用意
-    this->totalStates = v_num*v_num*h_num*h_num;
+    this->totalStates = 1 << (v_num + h_num);
     this->v.resize(v_num);
     this->h.resize(h_num);
     this->W.resize(v_num);
