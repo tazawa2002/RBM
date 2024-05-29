@@ -60,5 +60,29 @@ int main(void){
         return 1;
     }
 
+    rbm1.p_distr_calc();
+    FILE *p;
+    p = fopen("./data/p_distr.dat", "w");
+    if (p != NULL) {
+        for(i=0;i<rbm1.totalStates;i++){
+            fprintf(p, "%d %lf\n", i, rbm1.p_distr[i]); // ファイルにテキストを書き込む
+        }
+        fclose(p); // ファイルを閉じる
+    } else {
+        perror("Error opening p"); // ファイルを開けなかった場合のエラー処理
+        return 1;
+    }
+
+    p = fopen("./data/histgram.dat", "w");
+    if (p != NULL) {
+        for(i=0;i<rbm1.totalStates;i++){
+            fprintf(p, "%d %lf\n", i, (double)rbm1.histgram[i]/num); // ファイルにテキストを書き込む
+        }
+        fclose(p); // ファイルを閉じる
+    } else {
+        perror("Error opening p"); // ファイルを開けなかった場合のエラー処理
+        return 1;
+    }
+
     return 0;
 }
