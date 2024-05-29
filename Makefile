@@ -16,4 +16,4 @@ rbm.o: rbm.cpp rbm.h
 	g++ -c rbm.cpp
 
 clean:
-	rm main.o bm.o learn.o
+	rm main.o rbm.o learn.o
