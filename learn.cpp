@@ -9,7 +9,7 @@ int main(void){
 
     rbm1.dataGen(num); // 訓練データを生成
     rbm2.dataRead(num); // 訓練データを読み込む
-    rbm2.train(); // 群連データを用いて学習
+    rbm2.train(); // 訓練データを用いて学習
 
     FILE *f;
     int i;
