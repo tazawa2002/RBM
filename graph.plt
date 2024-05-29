@@ -6,7 +6,7 @@ stats './data/p_distr.dat' using 2
 ymax1 = STATS_max
 x = STATS_records
 
-stats './data/histgram1.dat' using 2
+stats './data/histgram.dat' using 2
 ymax2 = STATS_max
 
 ymax = ymax1 > ymax2 ? ymax1 : ymax2
