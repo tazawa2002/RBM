@@ -1,5 +1,5 @@
 set term pdfcairo size 12in, 4in font "VL-PGothic-Regular.ttf,24"
-set output "./graph.pdf"
+set output "./graph/graph.pdf"
 
 # 縦軸の最大値を求める処理
 stats './data/p_distr.dat' using 2

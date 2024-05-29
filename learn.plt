@@ -1,5 +1,5 @@
 set term pdfcairo size 12in, 8in font "VL-PGothic-Regular.ttf,24"
-set output "./learn.pdf"
+set output "./graph/learn.pdf"
 set grid
 
 # 縦軸の最大値を求める処理

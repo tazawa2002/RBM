@@ -1,4 +1,5 @@
 /.vscode
+/graph/*
 /data/*
 /*.o
 /main
