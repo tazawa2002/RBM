@@ -18,9 +18,9 @@ set xlabel "状態"
 set ylabel "確率"
 
 set title "RBMの確率分布"
-plot "./data/p_distr.dat" smooth freq with boxes fill solid
+plot "./data/p_distr.dat" smooth freq with boxes fill solid lc rgb "#006400"
 
 set title "RBMのサンプリング結果"
-plot "./data/histgram.dat" smooth freq with boxes fill solid
+plot "./data/histgram.dat" smooth freq with boxes fill solid lc rgb "#006400"
 
 unset multiplot
