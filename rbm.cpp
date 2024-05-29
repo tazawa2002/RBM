@@ -260,26 +260,134 @@ void RBM::dataGen(int num){
 
 // データを読み込む関数
 void RBM::dataRead(int num){
-    int i, j, x;
+    int i, k, x;
     FILE *datafile;
     traindatanum = num;
-    traindata.resize(num);
-    for(i=0;i<num;i++){
+    traindata.resize(traindatanum);
+    for(i=0;i<traindatanum;i++){
         traindata[i].resize(v.size());
     }
     datafile = fopen("./data/data.dat", "r");
-    for(i=0;i<num;i++){
+    for(k=0;k<traindatanum;k++){
         fscanf(datafile, "%d", &x);
         setV(x);
-        for(j=0;j<v.size();j++){
-            traindata[i][j] = v[j];
+        for(i=0;i<v.size();i++){
+            traindata[k][i] = v[i];
         }
     }
     fclose(datafile);
 }
 
 void RBM::train(){
+    int i,j,k;
+    int loop_time = 0;
+    double learn_rate = 0.01;
+    double lambda;
+    double v_ave_model;
+    double v_ave_data;
+    double h_ave_model;
+    double h_ave_data;
+    double vh_ave_model;
+    double vh_ave_data;
+    double gradient = 10;
+    vector<double> gradient_b;
+    vector<double> gradient_c;
+    vector<vector<double> > gradient_w;
+    gradient_b.resize(v.size());
+    gradient_c.resize(h.size());
+    gradient_w.resize(v.size());
+    for(i=0;i<v.size();i++){
+        gradient_w[i].resize(h.size());
+    }
+    std::cout << "\e[?25l"; // カーソルを非表示
 
+    p_distr_calc();
+    while(gradient>0.01){
+
+        // パラメータの更新
+        for(i=0;i<v.size();i++){
+
+            // v_iのデータ平均を求める処理
+            v_ave_data = 0;
+            for(k=0;k<traindatanum;k++){
+                v_ave_data += traindata[k][i];
+            }
+            v_ave_data /= traindatanum;
+
+            // v_iのモデル平均
+            v_ave_model = 0;
+            for(k=0;k<totalStates;k++){
+                v_ave_model += p_distr[k]*((k>>i)&1);
+            }
+            gradient_b[i] = v_ave_data - v_ave_model;
+        }
+
+        for(j=0;j<h.size();j++){
+            // h_iのデータ平均を求める処理
+            h_ave_data = 0;
+            for(k=0;k<traindatanum;k++){
+                // lambdaを計算する
+                lambda = c[j];
+                for(i=0;i<v.size();i++){
+                    lambda += W[i][j]*traindata[k][i];
+                }
+                h_ave_data += sig(lambda);
+            }
+            h_ave_data /= traindatanum;
+
+            // h_jのモデル平均
+            h_ave_model = 0;
+            for(k=0;k<totalStates;k++){
+                h_ave_model += p_distr[k]*((k>>(j+v.size()))&1);
+            }
+            gradient_c[j] = h_ave_data - h_ave_model;
+        }
+
+        for(i=0;i<v.size();i++){
+            for(j=0;j<h.size();j++){
+                // vhのデータ平均を求める処理
+                vh_ave_data = 0;
+                for(k=0;k<traindatanum;k++){
+                    lambda = c[j];
+                    for(int l=0;l<v.size();l++){
+                        lambda += W[l][j]*traindata[k][l];
+                    }
+                    vh_ave_data += traindata[k][i]*sig(lambda);
+                }
+                vh_ave_data /= traindatanum;
+
+                // vhのモデル平均
+                vh_ave_model = 0;
+                for(k=0;k<totalStates;k++){
+                    vh_ave_model += p_distr[k]*((k>>i)&1)*((k>>(j+v.size()))&1);
+                }
+                gradient_w[i][j] = vh_ave_data - vh_ave_model;
+            }
+        }
+
+        // パラメータの更新と勾配の計算
+        gradient = 0;
+        for(i=0;i<v.size();i++){
+            gradient += gradient_b[i]*gradient_b[i];
+            b[i] += learn_rate*gradient_b[i];
+        }
+        for(j=0;j<h.size();j++){
+            gradient += gradient_c[j]*gradient_c[j];
+            c[j] += learn_rate*gradient_c[j];
+        }
+        for(i=0;i<v.size();i++){
+            for(j=0;j<h.size();j++){
+                gradient += gradient_w[i][j]*gradient_w[i][j];
+                W[i][j] += learn_rate*gradient_w[i][j];
+            }
+        }
+        gradient = sqrt(gradient);
+        std::cout << "\r" << loop_time << ": " << gradient;
+        if(loop_time%100 == 0) fflush(stdout);
+        p_distr_calc();
+        loop_time++;
+    }
+    std::cout << "\e[?25h" << endl; // カーソルの再表示
 }
 
 // 可視変数の状態を2進数で返す関数
