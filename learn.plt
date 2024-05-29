@@ -1,5 +1,5 @@
 set term pdfcairo size 12in, 8in font "VL-PGothic-Regular.ttf,24"
-set output "./graph/learn.pdf"
+set output "./graph/learn_v.pdf"
 set grid
 
 # 縦軸の最大値を求める処理
@@ -44,29 +44,44 @@ plot "./data/rbm2_q.dat" with boxes fill solid lc rgb "#006400"
 
 unset multiplot
 
-set term pdfcairo size 12in, 4in font "VL-PGothic-Regular.ttf,24"
-set output "./graph/learn2.pdf"
+set term pdfcairo size 12in, 8in font "VL-PGothic-Regular.ttf,24"
+set output "./graph/learn_vh.pdf"
 
 # 縦軸の最大値を求める処理
-stats './data/p_distr.dat' using 2
+stats './data/p_distr1.dat' using 2
 ymax1 = STATS_max
 x = STATS_records
 
-stats './data/histgram.dat' using 2
+stats './data/histgram1.dat' using 2
 ymax2 = STATS_max
 
+stats './data/p_distr2.dat' using 2
+ymax3 = STATS_max
+
+stats './data/histgram2.dat' using 2
+ymax4 = STATS_max
+
 ymax = ymax1 > ymax2 ? ymax1 : ymax2
+ymax = ymax > ymax3 ? ymax : ymax3
+ymax = ymax > ymax4 ? ymax : ymax4
 
 unset key
-set multiplot layout 1,2
+set multiplot layout 2,2
+set xrange [-0.5:x-0.5]
 set yrange[0:ymax*1.1]
 set xlabel "状態"
 set ylabel "確率"
 
-set title "RBMの確率分布"
-plot "./data/p_distr.dat" smooth freq with boxes fill solid lc rgb "#006400"
+set title "生成モデルの確率分布"
+plot "./data/p_distr1.dat" smooth freq with boxes fill solid lc rgb "#006400"
 
-set title "RBMのサンプリング結果"
-plot "./data/histgram.dat" smooth freq with boxes fill solid lc rgb "#006400"
+set title "学習モデルの確率分布"
+plot "./data/p_distr2.dat" smooth freq with boxes fill solid lc rgb "#006400"
+
+set title "生成モデルのサンプリング結果"
+plot "./data/histgram1.dat" smooth freq with boxes fill solid lc rgb "#006400"
+
+set title "学習モデルのサンプリング結果"
+plot "./data/histgram2.dat" smooth freq with boxes fill solid lc rgb "#006400"
 
 unset multiplot

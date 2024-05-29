@@ -62,7 +62,7 @@ int main(void){
 
     rbm1.p_distr_calc();
     FILE *p;
-    p = fopen("./data/p_distr.dat", "w");
+    p = fopen("./data/p_distr1.dat", "w");
     if (p != NULL) {
         for(i=0;i<rbm1.totalStates;i++){
             fprintf(p, "%d %lf\n", i, rbm1.p_distr[i]); // ファイルにテキストを書き込む
@@ -73,10 +73,33 @@ int main(void){
         return 1;
     }
 
-    p = fopen("./data/histgram.dat", "w");
+    p = fopen("./data/histgram1.dat", "w");
     if (p != NULL) {
         for(i=0;i<rbm1.totalStates;i++){
             fprintf(p, "%d %lf\n", i, (double)rbm1.histgram[i]/num); // ファイルにテキストを書き込む
+        }
+        fclose(p); // ファイルを閉じる
+    } else {
+        perror("Error opening p"); // ファイルを開けなかった場合のエラー処理
+        return 1;
+    }
+
+    rbm2.p_distr_calc();
+    p = fopen("./data/p_distr2.dat", "w");
+    if (p != NULL) {
+        for(i=0;i<rbm2.totalStates;i++){
+            fprintf(p, "%d %lf\n", i, rbm2.p_distr[i]); // ファイルにテキストを書き込む
+        }
+        fclose(p); // ファイルを閉じる
+    } else {
+        perror("Error opening p"); // ファイルを開けなかった場合のエラー処理
+        return 1;
+    }
+
+    p = fopen("./data/histgram2.dat", "w");
+    if (p != NULL) {
+        for(i=0;i<rbm2.totalStates;i++){
+            fprintf(p, "%d %lf\n", i, (double)rbm2.histgram[i]/num); // ファイルにテキストを書き込む
         }
         fclose(p); // ファイルを閉じる
     } else {
