@@ -17,3 +17,6 @@ rbm.o: rbm.cpp rbm.h
 
 clean:
 	rm main.o rbm.o learn.o
+
+dataclean:
+	rm ./data/*

@@ -299,8 +299,12 @@ void RBM::train(){
     for(i=0;i<v.size();i++){
         gradient_w[i].resize(h.size());
     }
-    std::cout << "\e[?25l"; // カーソルを非表示
 
+    // アニメーション用の変数
+    FILE *p;
+    char filename[100];
+
+    std::cout << "\e[?25l"; // カーソルを非表示
     p_distr_calc();
     while(gradient>0.01){
 
@@ -385,6 +389,32 @@ void RBM::train(){
         std::cout << "\r" << loop_time << ": " << gradient;
         if(loop_time%100 == 0) fflush(stdout);
         p_distr_calc();
+        p_distr_v_calc();
+
+        // アニメーション用のファイルを出力
+        if(loop_time%10 == 0){
+            sprintf(filename, "./data/learn-vh-%03d.txt", loop_time/10);
+            p = fopen(filename, "w");
+            if (p != NULL) {
+                for(i=0;i<totalStates;i++){
+                    fprintf(p, "%d %lf\n", i, p_distr[i]); 
+                }
+                fclose(p);
+            } else {
+                perror("Error opening p");
+            }
+
+            sprintf(filename, "./data/learn-v-%03d.txt", loop_time/10);
+            p = fopen(filename, "w");
+            if (p != NULL) {
+                for(i=0;i<vStates;i++){
+                    fprintf(p, "%d %lf\n", i, p_distr_v[i]);
+                }
+                fclose(p);
+            } else {
+                perror("Error opening p");
+            }
+        }
         loop_time++;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
