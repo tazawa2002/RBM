@@ -3,9 +3,6 @@
 // コンストラクタ
 RBM::RBM(int v_num, int h_num){
     // 変数の用意
-    this->vStates = pow(2,v_num);
-    this->hStates = pow(2,h_num);
-    this->totalStates = this->vStates*this->hStates;
     this->v.resize(v_num);
     this->h.resize(h_num);
     this->W.resize(v_num);
@@ -14,6 +11,17 @@ RBM::RBM(int v_num, int h_num){
     }
     this->b.resize(v_num);
     this->c.resize(h_num);
+    this->Ev.resize(v_num);
+    this->Eh.resize(h_num);
+    this->Evh.resize(v_num);
+    for(int i=0;i<v_num;i++){
+        this->Evh[i].resize(h_num);
+    }
+
+    // 厳密計算に必要な変数
+    this->vStates = pow(2,v_num);
+    this->hStates = pow(2,h_num);
+    this->totalStates = this->vStates*this->hStates;
     this->p_distr.resize(this->totalStates);
     this->p_distr_v.resize(this->vStates);
     this->histgram.resize(this->totalStates);
@@ -418,6 +426,194 @@ void RBM::train(){
         loop_time++;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
+}
+
+void RBM::train_sampling(int num){
+    int i,j,k;
+    int loop_time = 0;
+    double learn_rate = 0.01;
+    double lambda;
+    double v_ave_model;
+    double v_ave_data;
+    double h_ave_model;
+    double h_ave_data;
+    double vh_ave_model;
+    double vh_ave_data;
+    double gradient = 10;
+    vector<double> gradient_b;
+    vector<double> gradient_c;
+    vector<vector<double> > gradient_w;
+    gradient_b.resize(v.size());
+    gradient_c.resize(h.size());
+    gradient_w.resize(v.size());
+    for(i=0;i<v.size();i++){
+        gradient_w[i].resize(h.size());
+    }
+
+    // アニメーション用の変数
+    FILE *p;
+    char filename[100];
+
+    std::cout << "\e[?25l"; // カーソルを非表示
+    sampling_expectation(num);
+    while(gradient>0.1){
+
+        // パラメータの更新
+        for(i=0;i<v.size();i++){
+
+            // v_iのデータ平均を求める処理
+            v_ave_data = 0;
+            for(k=0;k<traindatanum;k++){
+                v_ave_data += traindata[k][i];
+            }
+            v_ave_data /= traindatanum;
+
+            // v_iのモデル平均
+            v_ave_model = Ev[i];
+            gradient_b[i] = v_ave_data - v_ave_model;
+        }
+
+        for(j=0;j<h.size();j++){
+            // h_iのデータ平均を求める処理
+            h_ave_data = 0;
+            for(k=0;k<traindatanum;k++){
+                // lambdaを計算する
+                lambda = c[j];
+                for(i=0;i<v.size();i++){
+                    lambda += W[i][j]*traindata[k][i];
+                }
+                h_ave_data += sig(lambda);
+            }
+            h_ave_data /= traindatanum;
+
+            // h_jのモデル平均
+            h_ave_model = Eh[j];
+            gradient_c[j] = h_ave_data - h_ave_model;
+        }
+
+        for(i=0;i<v.size();i++){
+            for(j=0;j<h.size();j++){
+                // vhのデータ平均を求める処理
+                vh_ave_data = 0;
+                for(k=0;k<traindatanum;k++){
+                    lambda = c[j];
+                    for(int l=0;l<v.size();l++){
+                        lambda += W[l][j]*traindata[k][l];
+                    }
+                    vh_ave_data += traindata[k][i]*sig(lambda);
+                }
+                vh_ave_data /= traindatanum;
+
+                // vhのモデル平均
+                vh_ave_model = Evh[i][j];
+                gradient_w[i][j] = vh_ave_data - vh_ave_model;
+            }
+        }
+
+        // パラメータの更新と勾配の計算
+        gradient = 0;
+        for(i=0;i<v.size();i++){
+            gradient += gradient_b[i]*gradient_b[i];
+            b[i] += learn_rate*gradient_b[i];
+        }
+        for(j=0;j<h.size();j++){
+            gradient += gradient_c[j]*gradient_c[j];
+            c[j] += learn_rate*gradient_c[j];
+        }
+        for(i=0;i<v.size();i++){
+            for(j=0;j<h.size();j++){
+                gradient += gradient_w[i][j]*gradient_w[i][j];
+                W[i][j] += learn_rate*gradient_w[i][j];
+            }
+        }
+        gradient = sqrt(gradient);
+        std::cout << "\r" << loop_time << ": " << gradient;
+        if(loop_time%100 == 0) fflush(stdout);
+        sampling_expectation(num);
+
+        p_distr_calc();
+        p_distr_v_calc();
+        // アニメーション用のファイルを出力
+        if(loop_time%10 == 0){
+            sprintf(filename, "./data/learn-vh-%03d.txt", loop_time/10);
+            p = fopen(filename, "w");
+            if (p != NULL) {
+                for(i=0;i<totalStates;i++){
+                    fprintf(p, "%d %lf\n", i, p_distr[i]); 
+                }
+                fclose(p);
+            } else {
+                perror("Error opening p");
+            }
+
+            sprintf(filename, "./data/learn-v-%03d.txt", loop_time/10);
+            p = fopen(filename, "w");
+            if (p != NULL) {
+                for(i=0;i<vStates;i++){
+                    fprintf(p, "%d %lf\n", i, p_distr_v[i]);
+                }
+                fclose(p);
+            } else {
+                perror("Error opening p");
+            }
+        }
+        loop_time++;
+    }
+    std::cout << "\e[?25h" << endl; // カーソルの再表示
+}
+
+void RBM::sampling_expectation(int num){
+    int i, j, k, l;
+    
+    for(i=0;i<v.size();i++){
+        Ev[i] = 0;
+    }
+    for(j=0;j<h.size();j++){
+        Eh[j] = 0;
+    }
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            Evh[i][j] = 0;
+        }
+    }
+
+    for(k=0;k<1000;k++){
+        update_v();
+        update_h();
+    }
+
+    for(k=0;k<num;k++){
+        for(l=0;l<10;l++) {
+            update_v();
+            update_h();
+        }
+        
+        // 期待値を足す
+        for(i=0;i<v.size();i++){
+            Ev[i] += v[i];
+        }
+        for(j=0;j<h.size();j++){
+            Eh[j] += h[j];
+        }
+        for(i=0;i<v.size();i++){
+            for(j=0;j<h.size();j++){
+                Evh[i][j] += v[i]*h[j];
+            }
+        }
+    }
+
+    // データ数で割る
+    for(i=0;i<v.size();i++){
+        Ev[i] /= num;
+    }
+    for(j=0;j<h.size();j++){
+        Eh[j] /= num;
+    }
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            Evh[i][j] /= num;
+        }
+    }
 }
 
 // 可視変数の状態を2進数で返す関数
