@@ -1,4 +1,4 @@
-set terminal gif animate delay 1 font "VL-PGothic-Regular.ttf,10"
+set terminal gif animate delay 1 font "VL PGothic,10"
 set size 720, 480
 set output "./graph/learn-animate.gif"
 

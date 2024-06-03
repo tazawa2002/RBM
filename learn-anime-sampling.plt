@@ -1,4 +1,4 @@
-set terminal gif animate delay 1 font "VL-PGothic-Regular.ttf,10" size 720, 480
+set terminal gif animate delay 1 font "VL PGothic,10" size 720, 480
 set size 720, 480
 set output "./graph/learn-animate.gif"
 
@@ -21,7 +21,7 @@ ymax_q = ymax2
 
 unset key
 
-do for [i=0:41]{
+do for [i=0:57]{
     set multiplot layout 2,2
     set xlabel "状態"
     set ylabel "確率"

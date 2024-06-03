@@ -1,4 +1,4 @@
-set term pdfcairo size 12in, 4in font "VL-PGothic-Regular.ttf,24"
+set term pdfcairo size 12in, 4in font "VL PGothic,24"
 set output "./graph/graph.pdf"
 
 # 縦軸の最大値を求める処理

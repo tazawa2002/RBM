@@ -1,4 +1,4 @@
-set term pdfcairo size 12in, 8in font "VL-PGothic-Regular.ttf,24"
+set term pdfcairo size 12in, 8in font "VL PGothic,24"
 set output "./graph/learn_v.pdf"
 set grid
 
