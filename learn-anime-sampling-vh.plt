@@ -22,7 +22,11 @@ ymax_q = ymax2 > ymax4 ? ymax2 : ymax4
 
 unset key
 
-do for [i=0:42]{
+# ファイル数を数える
+file_count = system("ls ./data/learn-vh-*.txt | wc -l")
+file_count = int(file_count)
+
+do for [i=0:file_count-1]{
     set multiplot layout 2,2
     set xlabel "状態"
     set ylabel "確率"

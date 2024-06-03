@@ -26,7 +26,11 @@ set yrange[0:ymax*1.1]
 set xlabel "状態"
 set ylabel "確率"
 
-do for [i=0:116]{
+# ファイル数を数える
+file_count = system("ls ./data/learn-vh-*.txt | wc -l")
+file_count = int(file_count)
+
+do for [i=0:file_count-1]{
     set multiplot layout 2,2
 
     set title "生成モデルの確率分布"
