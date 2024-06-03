@@ -1,4 +1,4 @@
-all: main learn
+all: main learn learn-sampling
 
 main: main.o rbm.o
 	g++ -o main main.o rbm.o

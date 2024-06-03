@@ -401,7 +401,7 @@ void RBM::train(){
 
         // アニメーション用のファイルを出力
         if(loop_time%10 == 0){
-            sprintf(filename, "./data/learn-vh-%03d.txt", loop_time/10);
+            snprintf(filename, sizeof(filename), "./data/learn-vh-%03d.txt", loop_time/10);
             p = fopen(filename, "w");
             if (p != NULL) {
                 for(i=0;i<totalStates;i++){
@@ -412,7 +412,7 @@ void RBM::train(){
                 perror("Error opening p");
             }
 
-            sprintf(filename, "./data/learn-v-%03d.txt", loop_time/10);
+            snprintf(filename, sizeof(filename), "./data/learn-v-%03d.txt", loop_time/10);
             p = fopen(filename, "w");
             if (p != NULL) {
                 for(i=0;i<vStates;i++){
@@ -535,7 +535,7 @@ void RBM::train_sampling(int num){
         p_distr_v_calc();
         // アニメーション用のファイルを出力
         if(loop_time%10 == 0){
-            sprintf(filename, "./data/learn-vh-%03d.txt", loop_time/10);
+            snprintf(filename, sizeof(filename), "./data/learn-vh-%03d.txt", loop_time/10);
             p = fopen(filename, "w");
             if (p != NULL) {
                 for(i=0;i<totalStates;i++){
@@ -546,7 +546,7 @@ void RBM::train_sampling(int num){
                 perror("Error opening p");
             }
 
-            sprintf(filename, "./data/learn-v-%03d.txt", loop_time/10);
+            snprintf(filename, sizeof(filename), "./data/learn-v-%03d.txt", loop_time/10);
             p = fopen(filename, "w");
             if (p != NULL) {
                 for(i=0;i<vStates;i++){
