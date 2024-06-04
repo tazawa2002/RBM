@@ -314,6 +314,7 @@ void RBM::train(){
 
     std::cout << "\e[?25l"; // カーソルを非表示
     p_distr_calc();
+    p_distr_v_calc();
     while(gradient>0.01){
 
         // パラメータの更新
@@ -328,8 +329,8 @@ void RBM::train(){
 
             // v_iのモデル平均
             v_ave_model = 0;
-            for(k=0;k<totalStates;k++){
-                v_ave_model += p_distr[k]*((k>>i)&1);
+            for(k=0;k<vStates;k++){
+                v_ave_model += p_distr_v[k]*((k>>i)&1);
             }
             gradient_b[i] = v_ave_data - v_ave_model;
         }
@@ -349,8 +350,12 @@ void RBM::train(){
 
             // h_jのモデル平均
             h_ave_model = 0;
-            for(k=0;k<totalStates;k++){
-                h_ave_model += p_distr[k]*((k>>(j+v.size()))&1);
+            for(k=0;k<vStates;k++){
+                lambda = c[j];
+                for(i=0;i<v.size();i++){
+                    lambda += W[i][j]*((k>>i)&1);
+                }
+                h_ave_model += p_distr_v[k]*sig(lambda);
             }
             gradient_c[j] = h_ave_data - h_ave_model;
         }
@@ -370,8 +375,12 @@ void RBM::train(){
 
                 // vhのモデル平均
                 vh_ave_model = 0;
-                for(k=0;k<totalStates;k++){
-                    vh_ave_model += p_distr[k]*((k>>i)&1)*((k>>(j+v.size()))&1);
+                for(k=0;k<vStates;k++){
+                    lambda = c[j];
+                    for(int l=0;l<v.size();l++){
+                        lambda += W[l][j]*((k>>l)&1);
+                    }
+                    vh_ave_model += ((k>>i)&1)*sig(lambda)*p_distr_v[k];
                 }
                 gradient_w[i][j] = vh_ave_data - vh_ave_model;
             }
