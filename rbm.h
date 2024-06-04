@@ -15,6 +15,7 @@ class RBM {
         RBM(int v_num, int h_num);
         ~RBM();
         double energy_calc();
+        double energy_v_calc();
         void update_v();
         void update_h();
         void sampling(int num);

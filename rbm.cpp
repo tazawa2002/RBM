@@ -74,6 +74,23 @@ double RBM::energy_calc(){
     return energy;
 }
 
+double RBM::energy_v_calc(){
+    int i,j;
+    double lambda;
+    double energy = 0;
+    for(i=0;i<this->v.size();i++){
+        energy -= b[i]*v[i];
+    }
+    for(j=0;j<this->h.size();j++){
+        lambda = c[j];
+        for(i=0;i<this->v.size();i++){
+            lambda += W[i][j]*v[i];
+        }
+        energy -= log(1+exp(lambda));
+    }
+    return energy;
+}
+
 // 確率を計算
 void RBM::p_distr_calc(){
     int i,j,k;
@@ -100,34 +117,23 @@ void RBM::p_distr_calc(){
 
 // 確率を計算
 void RBM::p_distr_v_calc(){
-    int i,j,k;
+    int i, k;
     double Z = 0;
 
     // 配列の初期化
-    for(i=0;i<vStates;i++){
-        p_distr_v[i] = 0;
-    }
-
-    // すべての状態の確率を求める
     for(k=0;k<vStates;k++){
-        // 状態を設定
         for(i=0;i<v.size();i++){
-            v[i] = (k >> i)&1;
+            v[i] = (k >> i) & 1;
         }
-        for(i=0;i<hStates;i++){
-            for(j=0;j<h.size();j++){
-                h[j] = (i >> j)&1;
-            }
-            p_distr_v[k] += exp(-energy_calc());
-        }
+        p_distr_v[k] = exp(-energy_v_calc());
     }
 
-    for(i=0;i<this->vStates;i++){
-        Z += p_distr_v[i];
+    for(k=0;k<this->vStates;k++){
+        Z += p_distr_v[k];
     }
 
-    for(i=0;i<vStates;i++){
-        p_distr_v[i] = p_distr_v[i] / Z;
+    for(k=0;k<vStates;k++){
+        p_distr_v[k] = p_distr_v[k] / Z;
     }
 }
 
@@ -387,6 +393,7 @@ void RBM::train(){
         // アニメーション用のファイルを出力
         train_anime(loop_time, 10);
         loop_time++;
+        if(loop_time > 1000) break;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
 }
@@ -494,32 +501,8 @@ void RBM::train_sampling(int num){
         if(loop_time%100 == 0) fflush(stdout);
         sampling_expectation(num);
 
-        p_distr_calc();
-        p_distr_v_calc();
         // アニメーション用のファイルを出力
-        if(loop_time%10 == 0){
-            snprintf(filename, sizeof(filename), "./data/learn-vh-%03d.txt", loop_time/10);
-            p = fopen(filename, "w");
-            if (p != NULL) {
-                for(i=0;i<totalStates;i++){
-                    fprintf(p, "%d %lf\n", i, p_distr[i]); 
-                }
-                fclose(p);
-            } else {
-                perror("Error opening p");
-            }
-
-            snprintf(filename, sizeof(filename), "./data/learn-v-%03d.txt", loop_time/10);
-            p = fopen(filename, "w");
-            if (p != NULL) {
-                for(i=0;i<vStates;i++){
-                    fprintf(p, "%d %lf\n", i, p_distr_v[i]);
-                }
-                fclose(p);
-            } else {
-                perror("Error opening p");
-            }
-        }
+        train_anime(loop_time, 10);
         loop_time++;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
@@ -530,6 +513,7 @@ void RBM::train_anime(int loop_time, int skip){
     int i;
     char filename[100];
     FILE *p;
+    p_distr_v_calc();
     if(loop_time%skip == 0){
         snprintf(filename, sizeof(filename), "./data/learn-v-%03d.txt", loop_time/skip);
         p = fopen(filename, "w");
