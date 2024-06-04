@@ -44,7 +44,9 @@ class RBM {
         vector<double> Eh;
         vector< vector<double> > Evh;
         double sig(double x);
+        void exact_expectation();
         void sampling_expectation(int num);
+        void train_anime(int loop_time, int skip);
 
         void print();
         int state_num();

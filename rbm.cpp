@@ -313,9 +313,9 @@ void RBM::train(){
     char filename[100];
 
     std::cout << "\e[?25l"; // カーソルを非表示
-    p_distr_calc();
-    p_distr_v_calc();
     while(gradient>0.01){
+        // 期待値を計算
+        exact_expectation();
 
         // パラメータの更新
         for(i=0;i<v.size();i++){
@@ -327,12 +327,7 @@ void RBM::train(){
             }
             v_ave_data /= traindatanum;
 
-            // v_iのモデル平均
-            v_ave_model = 0;
-            for(k=0;k<vStates;k++){
-                v_ave_model += p_distr_v[k]*((k>>i)&1);
-            }
-            gradient_b[i] = v_ave_data - v_ave_model;
+            gradient_b[i] = v_ave_data - Ev[i];
         }
 
         for(j=0;j<h.size();j++){
@@ -349,15 +344,7 @@ void RBM::train(){
             h_ave_data /= traindatanum;
 
             // h_jのモデル平均
-            h_ave_model = 0;
-            for(k=0;k<vStates;k++){
-                lambda = c[j];
-                for(i=0;i<v.size();i++){
-                    lambda += W[i][j]*((k>>i)&1);
-                }
-                h_ave_model += p_distr_v[k]*sig(lambda);
-            }
-            gradient_c[j] = h_ave_data - h_ave_model;
+            gradient_c[j] = h_ave_data - Eh[j];
         }
 
         for(i=0;i<v.size();i++){
@@ -373,16 +360,7 @@ void RBM::train(){
                 }
                 vh_ave_data /= traindatanum;
 
-                // vhのモデル平均
-                vh_ave_model = 0;
-                for(k=0;k<vStates;k++){
-                    lambda = c[j];
-                    for(int l=0;l<v.size();l++){
-                        lambda += W[l][j]*((k>>l)&1);
-                    }
-                    vh_ave_model += ((k>>i)&1)*sig(lambda)*p_distr_v[k];
-                }
-                gradient_w[i][j] = vh_ave_data - vh_ave_model;
+                gradient_w[i][j] = vh_ave_data - Evh[i][j];
             }
         }
 
@@ -405,33 +383,9 @@ void RBM::train(){
         gradient = sqrt(gradient);
         std::cout << "\r" << loop_time << ": " << gradient;
         if(loop_time%100 == 0) fflush(stdout);
-        p_distr_calc();
-        p_distr_v_calc();
 
         // アニメーション用のファイルを出力
-        if(loop_time%10 == 0){
-            snprintf(filename, sizeof(filename), "./data/learn-vh-%03d.txt", loop_time/10);
-            p = fopen(filename, "w");
-            if (p != NULL) {
-                for(i=0;i<totalStates;i++){
-                    fprintf(p, "%d %lf\n", i, p_distr[i]); 
-                }
-                fclose(p);
-            } else {
-                perror("Error opening p");
-            }
-
-            snprintf(filename, sizeof(filename), "./data/learn-v-%03d.txt", loop_time/10);
-            p = fopen(filename, "w");
-            if (p != NULL) {
-                for(i=0;i<vStates;i++){
-                    fprintf(p, "%d %lf\n", i, p_distr_v[i]);
-                }
-                fclose(p);
-            } else {
-                perror("Error opening p");
-            }
-        }
+        train_anime(loop_time, 10);
         loop_time++;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
@@ -569,6 +523,62 @@ void RBM::train_sampling(int num){
         loop_time++;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
+}
+
+void RBM::train_anime(int loop_time, int skip){
+    // アニメーション用のファイルを出力
+    int i;
+    char filename[100];
+    FILE *p;
+    if(loop_time%skip == 0){
+        snprintf(filename, sizeof(filename), "./data/learn-v-%03d.txt", loop_time/skip);
+        p = fopen(filename, "w");
+        if (p != NULL) {
+            for(i=0;i<vStates;i++){
+                fprintf(p, "%d %lf\n", i, p_distr_v[i]);
+            }
+            fclose(p);
+        } else {
+            perror("Error opening p");
+        }
+    }
+}
+
+void RBM::exact_expectation(){
+    int i, j, k;
+    double lambda;
+    p_distr_v_calc();
+    for(i=0;i<v.size();i++){
+        // v_iのモデル平均
+        Ev[i] = 0;
+        for(k=0;k<vStates;k++){
+            Ev[i] += p_distr_v[k]*((k>>i)&1);
+        }
+    }
+    for(j=0;j<h.size();j++){
+        // h_jのモデル平均
+        Eh[j] = 0;
+        for(k=0;k<vStates;k++){
+            lambda = c[j];
+            for(i=0;i<v.size();i++){
+                lambda += W[i][j]*((k>>i)&1);
+            }
+            Eh[j] += p_distr_v[k]*sig(lambda);
+        }
+    }
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            // vhのモデル平均
+            Evh[i][j] = 0;
+            for(k=0;k<vStates;k++){
+                lambda = c[j];
+                for(int l=0;l<v.size();l++){
+                    lambda += W[l][j]*((k>>l)&1);
+                }
+                Evh[i][j] += ((k>>i)&1)*sig(lambda)*p_distr_v[k];
+            }
+        }
+    }
 }
 
 void RBM::sampling_expectation(int num){
