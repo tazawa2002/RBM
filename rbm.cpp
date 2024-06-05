@@ -22,9 +22,9 @@ RBM::RBM(int v_num, int h_num){
     this->vStates = pow(2,v_num);
     this->hStates = pow(2,h_num);
     this->totalStates = this->vStates*this->hStates;
-    this->p_distr.resize(this->totalStates);
+    // this->p_distr.resize(this->totalStates);
     this->p_distr_v.resize(this->vStates);
-    this->histgram.resize(this->totalStates);
+    // this->histgram.resize(this->totalStates);
     this->histgram_v.resize(this->vStates);
 
     std::random_device rd;
@@ -86,7 +86,14 @@ double RBM::energy_v_calc(){
         for(i=0;i<this->v.size();i++){
             lambda += W[i][j]*v[i];
         }
-        energy -= log(1+exp(lambda));
+
+        // 指数関数の発散を防ぐ処理を追加
+        // 1 << exp(lambda)のとき log(1+exp(lambda)) ≒ lambda
+        if(lambda > 20){
+            energy -= lambda;
+        }else{
+            energy -= log(1+exp(lambda));
+        }
     }
     return energy;
 }
@@ -183,9 +190,9 @@ void RBM::sampling(int num){
     for(i=0;i<vStates;i++){
         histgram_v[i] = 0;
     }
-    for(i=0;i<totalStates;i++){
-        histgram[i] = 0;
-    }
+    // for(i=0;i<totalStates;i++){
+    //     histgram[i] = 0;
+    // }
 
     for(i=0;i<1000;i++){
         update_v();
@@ -198,7 +205,7 @@ void RBM::sampling(int num){
             update_h();
         }
         // print();
-        histgram[state_num()] += 1;
+        // histgram[state_num()] += 1;
         histgram_v[stateV()] += 1;
     }
 }
@@ -247,9 +254,9 @@ void RBM::dataGen(int num){
     for(i=0;i<vStates;i++){
         histgram_v[i] = 0;
     }
-    for(i=0;i<totalStates;i++){
-        histgram[i] = 0;
-    }
+    // for(i=0;i<totalStates;i++){
+    //     histgram[i] = 0;
+    // }
 
     // バーンイン時間
     for(i=0;i<1000;i++){
@@ -266,7 +273,7 @@ void RBM::dataGen(int num){
             update_h();
         }
         fprintf(datafile, "%d\n", stateV());
-        histgram[state_num()] += 1;
+        // histgram[state_num()] += 1;
         histgram_v[stateV()] += 1;
     }
     fclose(datafile);
@@ -391,9 +398,8 @@ void RBM::train(){
         if(loop_time%100 == 0) fflush(stdout);
 
         // アニメーション用のファイルを出力
-        train_anime(loop_time, 10);
+        train_anime(loop_time, 50);
         loop_time++;
-        if(loop_time > 1000) break;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
 }
