@@ -25,6 +25,9 @@ class RBM {
         void train_sampling(int num);
         int traindatanum;
         vector< vector<int> > traindata;
+        void paramOutput();
+        void paramInput();
+        void paramPrint();
 
         int vStates;
         int hStates;
@@ -53,6 +56,7 @@ class RBM {
         int state_num();
         int stateV();
         void setV(int num);
+        void paramInit(int v_num, int h_num);
 
         // 乱数生成器のメンバ変数
         std::mt19937 gen;

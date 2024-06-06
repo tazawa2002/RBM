@@ -641,3 +641,115 @@ void RBM::setV(int num){
         v[i] = (num >> i) & 1;
     }
 }
+
+void RBM::paramOutput(){
+    int i, j;
+    FILE *p;
+    p = fopen("./data/param.dat", "w");
+    if (p == NULL) {
+        perror("Error opening p");
+        return;
+    }
+
+    // 可視変数の数と隠れ変数の数を出力
+    fprintf(p, "%ld %ld\n", v.size(), h.size());
+
+    // パラメータbの出力
+    for(i=0;i<v.size();i++){
+        fprintf(p, "%lf ", b[i]);
+    }
+    fprintf(p, "\n");
+
+    // パラメータcの出力
+    for(j=0;j<h.size();j++){
+        fprintf(p, "%lf ", c[j]);
+    }
+    fprintf(p, "\n");
+
+    // パラメータWの出力
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            fprintf(p, "%lf ", W[i][j]);
+        }
+        fprintf(p, "\n");
+    }
+    fclose(p);
+}
+
+void RBM::paramInput(){
+    int i, j;
+    int v_num, h_num;
+    FILE *p;
+    p = fopen("./data/param.dat", "r");
+    if (p == NULL) {
+        perror("Error opening p");
+        return;
+    }
+
+    // 可視変数の数と隠れ変数の数を入力
+    fscanf(p, "%d %d", &v_num, &h_num);
+    paramInit(v_num, h_num);
+
+    // パラメータbの入力
+    for(i=0;i<v.size();i++){
+        fscanf(p, "%lf", &b[i]);
+    }
+
+    // パラメータcの入力
+    for(j=0;j<h.size();j++){
+        fscanf(p, "%lf", &c[j]);
+    }
+
+    // パラメータWの入力
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            fscanf(p, "%lf", &W[i][j]);
+        }
+    }
+    fclose(p);
+}
+
+void RBM::paramPrint(){
+    int i, j;
+    for(i=0;i<v.size();i++){
+        printf("%lf ", b[i]);
+    }
+    printf("\n");
+
+    for(j=0;j<h.size();j++){
+        printf("%lf ", c[j]);
+    }
+    printf("\n");
+
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            printf("%lf ", W[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void RBM::paramInit(int v_num, int h_num){
+    // 変数の用意
+    this->v.resize(v_num);
+    this->h.resize(h_num);
+    this->W.resize(v_num);
+    for(int i=0;i<v_num;i++){
+        this->W[i].resize(h_num);
+    }
+    this->b.resize(v_num);
+    this->c.resize(h_num);
+    this->Ev.resize(v_num);
+    this->Eh.resize(h_num);
+    this->Evh.resize(v_num);
+    for(int i=0;i<v_num;i++){
+        this->Evh[i].resize(h_num);
+    }
+
+    // 厳密計算に必要な変数
+    this->vStates = pow(2,v_num);
+    this->hStates = pow(2,h_num);
+    this->totalStates = this->vStates*this->hStates;
+    this->p_distr_v.resize(this->vStates);
+    this->histgram_v.resize(this->vStates);
+}
