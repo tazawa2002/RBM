@@ -13,6 +13,7 @@ ymax = ymax1 > ymax2 ? ymax1 : ymax2
 
 unset key
 set multiplot layout 1,2
+set xrange[-0.5:x-0.5]
 set yrange[0:ymax*1.1]
 set xlabel "状態"
 set ylabel "確率"
