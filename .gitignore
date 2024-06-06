@@ -5,5 +5,7 @@
 /main
 /learn
 /learn-sampling
+/paramGen
+/paramRead
 /*.pdf
 /.DS_Store
