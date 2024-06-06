@@ -21,7 +21,7 @@ ymax_q = ymax2 > ymax4 ? ymax2 : ymax4
 unset key
 
 # ファイル数を数える
-file_count = system("ls ./data/learn-v-*.txt | wc -l")
+file_count = system("ls ./data/learn-v-*.dat | wc -l")
 file_count = int(file_count)
 
 do for [i=0:file_count-1]{
@@ -35,7 +35,7 @@ do for [i=0:file_count-1]{
     plot "./data/rbm1_p.dat" with boxes fill solid lc rgb "#006400"
 
     set title "学習モデルの確率分布"
-    plot sprintf("./data/learn-v-%03d.txt", i) with boxes fill solid lc rgb "#006400"
+    plot sprintf("./data/learn-v-%03d.dat", i) with boxes fill solid lc rgb "#006400"
 
     set ylabel "出現回数"
     set title "生成モデルのサンプリング結果"

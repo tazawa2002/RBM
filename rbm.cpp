@@ -521,7 +521,7 @@ void RBM::train_anime(int loop_time, int skip){
     FILE *p;
     p_distr_v_calc();
     if(loop_time%skip == 0){
-        snprintf(filename, sizeof(filename), "./data/learn-v-%03d.txt", loop_time/skip);
+        snprintf(filename, sizeof(filename), "./data/learn-v-%03d.dat", loop_time/skip);
         p = fopen(filename, "w");
         if (p != NULL) {
             for(i=0;i<vStates;i++){
