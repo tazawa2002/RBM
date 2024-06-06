@@ -6,9 +6,16 @@
 - rbm.cpp：RBMクラスのメンバ関数の実装が書いてあるファイル
 - main.cpp：RBMのサンプリングを実行するプログラムが書いてあるファイル
 - learn.cpp：RBMの学習を実行するプログラムが書いてあるファイル
+- paramGen.cpp：パラメーター値をファイルに出力するプログラムが書いてあるファイル
+- paramRead.cpp：パラメーター値をファイルから入力するプログラムが書いてあるファイル
 - Makefile：makeコマンドを使えるようにするファイル
-- graph.plt：サンプリング結果をグラフ化するgnuplotのスクリプト
-- learn.plt：学習の結果をグラフ化するgnuplotのスクリプト
+- plt：gnuplotのスクリプト用のディレクトリ
+    - graph.plt：main.cpp用のgnuplotのスクリプト
+    - learn.plt：learn.cpp用のgnuplotのスクリプト
+    - learn-anime.plt：学習のアニメーションを行うgnuplotのスクリプト
+    - learn-anime-sampling.plt：学習のアニメーションを行うgnuplotのスクリプト
+    - paramGen.plt：paramGen.cpp用のgnuplotのスクリプト
+    - paramRead.plt：paramRead.cpp用のgnuplotのスクリプト
 
 # 実行方法
 ## サンプリングの実行
