@@ -1,6 +1,7 @@
 /.vscode
-/graph/*
-/data/*
+/graph/*.pdf
+/graph/*.gif
+/data/*.dat
 /*.o
 /main
 /learn
