@@ -1,5 +1,4 @@
 set terminal gif animate delay 1 font "VL PGothic,10" size 720, 480
-set size 720, 480
 set output "./graph/learn-animate.gif"
 
 # 縦軸の最大値を求める処理
