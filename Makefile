@@ -37,4 +37,4 @@ clean:
 	rm main.o rbm.o learn.o learn-sampling.o paramGen.o paramRead.o main learn learn-sampling paramGen paramRead
 
 dataclean:
-	rm ./data/*
+	rm ./data/*.dat
