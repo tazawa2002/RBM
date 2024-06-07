@@ -35,7 +35,7 @@ int main(void){
         return 1;
     }
 
-    rbm2.train_sampling(300); // 訓練データを用いて学習
+    rbm2.train_sampling(1000, 300); // 訓練データを用いて学習
 
     rbm2.p_distr_v_calc();
     f = fopen("./data/rbm2_p.dat", "w");

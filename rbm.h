@@ -21,8 +21,8 @@ class RBM {
         void sampling(int num);
         void dataGen(int num);
         void dataRead(int num);
-        void train();
-        void train_sampling(int num);
+        void train(int epoch);
+        void train_sampling(int epoch, int num);
         int traindatanum;
         vector< vector<int> > traindata;
         void paramOutput();

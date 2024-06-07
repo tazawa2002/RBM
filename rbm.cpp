@@ -247,7 +247,7 @@ int RBM::state_num(){
 
 // データを生成する関数
 void RBM::dataGen(int num){
-    int i,j;
+    int i, j, k;
     FILE *datafile;
     
     // ヒストグラムを初期化
@@ -267,12 +267,15 @@ void RBM::dataGen(int num){
     datafile = fopen("./data/data.dat", "w");
 
     // データ生成のループ
-    for(i=0;i<num;i++){
+    for(k=0;k<num;k++){
         for(j=0;j<1;j++){
             update_v();
             update_h();
         }
-        fprintf(datafile, "%d\n", stateV());
+        for(i=0;i<v.size();i++){
+            fprintf(datafile, "%d ", v[i]);
+        }
+        fprintf(datafile, "\n");
         // histgram[state_num()] += 1;
         histgram_v[stateV()] += 1;
     }
@@ -290,16 +293,15 @@ void RBM::dataRead(int num){
     }
     datafile = fopen("./data/data.dat", "r");
     for(k=0;k<traindatanum;k++){
-        fscanf(datafile, "%d", &x);
-        setV(x);
         for(i=0;i<v.size();i++){
-            traindata[k][i] = v[i];
+            fscanf(datafile, "%d", &x);
+            traindata[k][i] = x;
         }
     }
     fclose(datafile);
 }
 
-void RBM::train(){
+void RBM::train(int epoch){
     int i,j,k;
     int loop_time = 0;
     double learn_rate = 0.01;
@@ -330,7 +332,7 @@ void RBM::train(){
     }
 
     std::cout << "\e[?25l"; // カーソルを非表示
-    while(gradient>0.01){
+    while(loop_time < epoch){
 
         exact_expectation(); // 期待値計算
         train_anime(loop_time, 50); // アニメーション用のファイル出力
@@ -405,10 +407,11 @@ void RBM::train(){
         loop_time++;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
+    fflush(p);
     fclose(p);
 }
 
-void RBM::train_sampling(int num){
+void RBM::train_sampling(int epoch,int num){
     int i,j,k;
     int loop_time = 0;
     double learn_rate = 0.01;
@@ -430,13 +433,15 @@ void RBM::train_sampling(int num){
         gradient_w[i].resize(h.size());
     }
 
-    // アニメーション用の変数
     FILE *p;
-    char filename[100];
+    p = fopen("./data/log_likelihood.dat", "w");
 
     std::cout << "\e[?25l"; // カーソルを非表示
-    sampling_expectation(num);
-    while(gradient>0.1){
+    while(loop_time < epoch){
+
+        sampling_expectation(num);
+        train_anime(loop_time, 10);
+        fprintf(p, "%d %lf\n", loop_time, log_likelihood());
 
         // パラメータの更新
         for(i=0;i<v.size();i++){
@@ -515,6 +520,11 @@ void RBM::train_sampling(int num){
         train_anime(loop_time, 10);
         loop_time++;
     }
+    sampling_expectation(num);
+    train_anime(loop_time, 10);
+    fprintf(p, "%d %lf\n", loop_time, log_likelihood());
+    fflush(p);
+    fclose(p);
     std::cout << "\e[?25h" << endl; // カーソルの再表示
 }
 

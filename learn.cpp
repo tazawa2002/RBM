@@ -4,12 +4,13 @@ int main(void){
     int n_v = 5;
     int n_h = 10;
     int num = 1000;
+    int epoch = 5000;
     RBM rbm1(n_v, 50);
     RBM rbm2(n_v, 10);
 
     rbm1.dataGen(num); // 訓練データを生成
     rbm2.dataRead(num); // 訓練データを読み込む
-    rbm2.train(); // 訓練データを用いて学習
+    rbm2.train(epoch); // 訓練データを用いて学習
 
     FILE *f;
     int i;

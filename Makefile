@@ -1,4 +1,4 @@
-all: main learn learn-sampling paramGen paramRead
+all: main learn learn-sampling paramGen paramRead log-likelihood
 
 main: main.o rbm.o
 	g++ -o main main.o rbm.o
@@ -15,6 +15,9 @@ paramGen: paramGen.o rbm.o
 paramRead: paramRead.o rbm.o
 	g++ -o paramRead paramRead.o rbm.o
 
+log-likelihood: log-likelihood.o rbm.o
+	g++ -o log-likelihood log-likelihood.o rbm.o
+
 main.o: main.cpp rbm.h
 	g++ -c main.cpp
 
@@ -30,11 +33,15 @@ paramGen.o: paramGen.cpp rbm.h
 paramRead.o: paramRead.cpp rbm.h
 	g++ -c paramRead.cpp
 
+log-likelihood.o: log-likelihood.cpp rbm.h
+	g++ -c log-likelihood.cpp
+
 rbm.o: rbm.cpp rbm.h
 	g++ -c rbm.cpp
 
 clean:
-	rm main.o rbm.o learn.o learn-sampling.o paramGen.o paramRead.o main learn learn-sampling paramGen paramRead
+	rm main.o rbm.o learn.o learn-sampling.o paramGen.o paramRead.o log-likelihood.o main learn learn-sampling paramGen paramRead log-likelihood
 
 dataclean:
 	rm ./data/*.dat
+
