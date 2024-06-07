@@ -321,14 +321,20 @@ void RBM::train(){
         gradient_w[i].resize(h.size());
     }
 
-    // アニメーション用の変数
+    // 対数尤度関数の出力ファイルの準備
     FILE *p;
-    char filename[100];
+    p = fopen("./data/log_likelihood.dat", "w");
+    if(p == NULL){
+        perror("Error opening log_likelihood.dat");
+        exit(1);
+    }
 
     std::cout << "\e[?25l"; // カーソルを非表示
     while(gradient>0.01){
-        // 期待値を計算
-        exact_expectation();
+
+        exact_expectation(); // 期待値計算
+        train_anime(loop_time, 50); // アニメーション用のファイル出力
+        fprintf(p, "%d %lf\n", loop_time, log_likelihood()); // 
 
         // パラメータの更新
         for(i=0;i<v.size();i++){
@@ -396,12 +402,10 @@ void RBM::train(){
         gradient = sqrt(gradient);
         std::cout << "\r" << loop_time << ": " << gradient;
         if(loop_time%100 == 0) fflush(stdout);
-
-        // アニメーション用のファイルを出力
-        train_anime(loop_time, 50);
         loop_time++;
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
+    fclose(p);
 }
 
 void RBM::train_sampling(int num){
@@ -752,4 +756,19 @@ void RBM::paramInit(int v_num, int h_num){
     this->totalStates = this->vStates*this->hStates;
     this->p_distr_v.resize(this->vStates);
     this->histgram_v.resize(this->vStates);
+}
+
+double RBM::log_likelihood(){
+    int i, j, mu;
+    int state;
+    double lambda;
+    double log_likelihood = 0;
+    for(mu=0;mu<traindatanum;mu++){
+        state = 0;
+        for(i=0;i<v.size();i++){
+            state += traindata[mu][i]*pow(2,i);
+        }
+        log_likelihood += log(p_distr_v[state]);
+    }
+    return log_likelihood / traindatanum;
 }

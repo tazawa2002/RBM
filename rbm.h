@@ -57,6 +57,7 @@ class RBM {
         int stateV();
         void setV(int num);
         void paramInit(int v_num, int h_num);
+        double log_likelihood();
 
         // 乱数生成器のメンバ変数
         std::mt19937 gen;
