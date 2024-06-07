@@ -759,7 +759,7 @@ void RBM::paramInit(int v_num, int h_num){
 }
 
 double RBM::log_likelihood(){
-    int i, j, mu;
+    int i, mu;
     int state;
     double lambda;
     double log_likelihood = 0;
