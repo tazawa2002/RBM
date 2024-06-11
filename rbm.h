@@ -13,7 +13,6 @@ using namespace std;
 class RBM {
     public:
         RBM(int v_num, int h_num);
-        ~RBM();
         double energy_calc();
         double energy_v_calc();
         void update_v();
@@ -22,12 +21,32 @@ class RBM {
         void dataGen(int num);
         void dataRead(int num);
         void train(int epoch);
-        void train_sampling(int epoch, int num);
         int traindatanum;
         vector< vector<int> > traindata;
         void paramOutput();
         void paramInput();
         void paramPrint();
+        enum class TrainType {
+            exact,
+            sampling
+        };
+        enum class GradientType {
+            nomal,
+            momentum,
+            adagrad
+        };
+        enum class AnimeteType {
+            none,
+            skip
+        };
+        TrainType train_type; // 訓練のタイプ
+        int sampling_num; // サンプリングで使用するデータ数
+        GradientType gradient_type; // 勾配法のタイプ
+        AnimeteType animete_type; // アニメーションのタイプ
+        void setTrainType(TrainType type);
+        void setGradientType(GradientType type);
+        void setAnimeteType(AnimeteType type);
+        void setSamplingNum(int num);
 
         int vStates;
         int hStates;
@@ -41,15 +60,27 @@ class RBM {
     private:
         vector<int> v;
         vector<int> h;
-        vector< vector<double> > W;
         vector<double> b;
         vector<double> c;
+        vector< vector<double> > W;
+
         vector<double> Ev;
         vector<double> Eh;
         vector< vector<double> > Evh;
+        vector<double> Ev_data;
+        vector<double> Eh_data;
+        vector< vector<double> > Evh_data;
+        vector<double> gradient_b;
+        vector<double> gradient_c;
+        vector<vector<double> > gradient_w;
+
         double sig(double x);
         void exact_expectation();
         void sampling_expectation(int num);
+        void data_expectation();
+        void gradient_nomal(double learn_rate);
+        void gradient_momentum(double learn_rate);
+        void gradient_adagrad(double learn_rate);
         void train_anime(int loop_time, int skip);
 
         void print();
@@ -57,6 +88,7 @@ class RBM {
         int stateV();
         void setV(int num);
         void paramInit(int v_num, int h_num);
+        void animeInit(int v_num, int h_num);
         double log_likelihood();
 
         // 乱数生成器のメンバ変数

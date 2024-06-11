@@ -6,8 +6,8 @@ set ylabel "対数尤度"
 
 set key right bottom
 
-set xrange [:1000]
+set xrange [:200]
 set yrange [:-2]
 
-plot "./data/log-likelihood-ave.dat" w l title "厳密計算", "./data/log-likelihood-ave-sampling.dat" w l title "サンプリング"
+plot "./data/log-likelihood-ave-nomal.dat" w l title "普通の勾配法", "./data/log-likelihood-ave-momentum.dat" w l title "モーメンタム法", "./data/log-likelihood-ave-adagrad.dat" w l title "AdaGrad"
 

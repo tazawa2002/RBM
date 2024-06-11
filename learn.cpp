@@ -1,12 +1,16 @@
 #include "rbm.h"
 
 int main(void){
-    int n_v = 5;
-    int n_h = 10;
+    int n_v = 8;
+    int n_h = 30;
     int num = 1000;
     int epoch = 5000;
     RBM rbm1(n_v, 50);
     RBM rbm2(n_v, 10);
+    rbm2.setTrainType(RBM::TrainType::sampling);
+    rbm1.setAnimeteType(RBM::AnimeteType::none);
+    rbm2.setAnimeteType(RBM::AnimeteType::none);
+    rbm2.sampling_num = num;
 
     rbm1.dataGen(num); // 訓練データを生成
     rbm2.dataRead(num); // 訓練データを読み込む
