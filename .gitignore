@@ -8,5 +8,6 @@
 /learn-sampling
 /paramGen
 /paramRead
+/log-likelihood
 /*.pdf
 /.DS_Store
