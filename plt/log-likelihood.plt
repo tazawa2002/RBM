@@ -5,8 +5,8 @@ set xlabel "学習回数"
 set ylabel "対数尤度"
 
 set key right bottom
-set xrange [0:1000]
-set yrange [-5:0]
+set xrange [0:200]
+set yrange [:]
 
 plot "./data/log_likelihood.dat" w l title "対数尤度"
 
