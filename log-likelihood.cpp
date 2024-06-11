@@ -1,11 +1,12 @@
 #include "rbm.h"
 
 int main(void){
-    int n_v = 5;
+    int n_v = 8;
     int n_h = 10;
-    int num = 100;
+    int num = 1000;
     int epoch = 200;
-    int learn_time = 1000;
+    int learn_time = 100;
+    RBM::TrainType type = RBM::TrainType::sampling;
     int i, j, k;
     vector<double> log_likelihood_sum;
     vector<double> log_likelihood;
@@ -22,12 +23,12 @@ int main(void){
 
     printf("\n\n");
     for(i=0;i<learn_time;i++){
-        printf("\033[2Alearn time: %d\033[0K\n", i+1);
+        printf("\033[2Alearn time(nomal): %d\033[0K\n", i+1);
         gen = new RBM(n_v, n_h);
         learn = new RBM(n_v, n_h);
         gen->setAnimeteType(RBM::AnimeteType::none);
         learn->setAnimeteType(RBM::AnimeteType::none);
-        learn->setTrainType(RBM::TrainType::exact);
+        learn->setTrainType(type);
         learn->setGradientType(RBM::GradientType::nomal);
 
         gen->dataGen(num);
@@ -61,12 +62,12 @@ int main(void){
     }
 
     for(i=0;i<learn_time;i++){
-        printf("\033[2Alearn time: %d\033[0K\n", i+1);
+        printf("\033[2Alearn time(momentum): %d\033[0K\n", i+1);
         gen = new RBM(n_v, n_h);
         learn = new RBM(n_v, n_h);
         gen->setTrainType(RBM::TrainType::exact);
         learn->setAnimeteType(RBM::AnimeteType::none);
-        learn->setTrainType(RBM::TrainType::exact);
+        learn->setTrainType(type);
         learn->setSamplingNum(num);
         learn->setGradientType(RBM::GradientType::momentum);
 
@@ -101,12 +102,12 @@ int main(void){
     }
 
     for(i=0;i<learn_time;i++){
-        printf("\033[2Alearn time: %d\033[0K\n", i+1);
+        printf("\033[2Alearn time(AdGard): %d\033[0K\n", i+1);
         gen = new RBM(n_v, n_h);
         learn = new RBM(n_v, n_h);
         gen->setTrainType(RBM::TrainType::exact);
         learn->setAnimeteType(RBM::AnimeteType::none);
-        learn->setTrainType(RBM::TrainType::exact);
+        learn->setTrainType(type);
         learn->setSamplingNum(num);
         learn->setGradientType(RBM::GradientType::adagrad);
 
