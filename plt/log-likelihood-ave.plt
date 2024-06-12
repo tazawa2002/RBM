@@ -6,10 +6,11 @@ set ylabel "対数尤度"
 
 set key right bottom
 
-set xrange [:200]
+set xrange [:100]
 set yrange [:]
 
 plot "./data/log-likelihood-ave-nomal.dat" w l linewidth 3 title "普通の勾配法", \
      "./data/log-likelihood-ave-momentum.dat" w l linewidth 3 title "モーメンタム法", \
-     "./data/log-likelihood-ave-adagrad.dat" w l linewidth 3 title "AdaGrad"
+     "./data/log-likelihood-ave-adagrad.dat" w l linewidth 3 title "AdaGrad", \
+     "./data/log-likelihood-ave-rmsprop.dat" w l linewidth 3 title "RMSProp"
 
