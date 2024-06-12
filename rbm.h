@@ -33,11 +33,12 @@ class RBM {
         enum class GradientType {
             nomal,
             momentum,
-            adagrad
+            adagrad,
+            rmsprop
         };
         enum class AnimeteType {
-            none,
-            skip
+            anime, // アニメーションを実行する
+            none // アニメーションを実行しない
         };
         TrainType train_type; // 訓練のタイプ
         int sampling_num; // サンプリングで使用するデータ数
@@ -81,6 +82,7 @@ class RBM {
         void gradient_nomal(double learn_rate);
         void gradient_momentum(double learn_rate);
         void gradient_adagrad(double learn_rate);
+        void gradient_rmsprop(double learn_rate);
         void train_anime(int loop_time, int skip);
 
         void print();

@@ -4,7 +4,7 @@
 RBM::RBM(int v_num, int h_num){
     train_type = TrainType::sampling;
     gradient_type = GradientType::nomal;
-    animete_type = AnimeteType::skip;
+    animete_type = AnimeteType::none;
     sampling_num = 100;
     paramInit(v_num, h_num); // 変数のリサイズ
 
@@ -243,7 +243,7 @@ void RBM::dataGen(int num){
             fprintf(datafile, "%d ", v[i]);
         }
         fprintf(datafile, "\n");
-        if(animete_type == AnimeteType::none){
+        if(animete_type == AnimeteType::anime){
             histgram_v[stateV()] += 1;
         }
     }
@@ -293,7 +293,7 @@ void RBM::train(int epoch){
     }
 
     FILE *p = NULL;
-    if(animete_type == AnimeteType::none){
+    if(animete_type == AnimeteType::anime){
         animeInit(v.size(), h.size());
         // 対数尤度関数の出力ファイルの準備
         p = fopen("./data/log_likelihood.dat", "w");
@@ -313,7 +313,7 @@ void RBM::train(int epoch){
         } else if (train_type == TrainType::sampling) {
             sampling_expectation(sampling_num);
         }
-        if(animete_type == AnimeteType::none){
+        if(animete_type == AnimeteType::anime){
             train_anime(loop_time, 50);
             fprintf(p, "%d %lf\n", loop_time, log_likelihood());
         }
@@ -325,6 +325,8 @@ void RBM::train(int epoch){
             gradient_momentum(learn_rate);
         }else if(gradient_type == GradientType::adagrad){
             gradient_adagrad(learn_rate);
+        }else if(gradient_type == GradientType::rmsprop){
+            gradient_rmsprop(learn_rate);
         }
 
         // パラメータの更新
@@ -571,6 +573,40 @@ void RBM::gradient_adagrad(double learn_rate){
     }
 }
 
+void RBM::gradient_rmsprop(double learn_rate){
+    int i, j;
+    double epsilon = 1e-8; // ゼロ除算を防ぐための小さな値
+    double rho = 0.9;
+    static vector<double> gradient_b_v;
+    static vector<double> gradient_c_v;
+    static vector<vector<double>> gradient_w_v;
+
+    // 勾配の二乗和を保持する配列が未定義の場合は初期化する
+    if (gradient_b_v.empty()) {
+        gradient_b_v.resize(v.size(), 0.0);
+        gradient_c_v.resize(h.size(), 0.0);
+        gradient_w_v.resize(v.size(), std::vector<double>(h.size(), 0.0));
+    }
+
+    for(i=0;i<v.size();i++){
+        double grad_b = Ev_data[i] - Ev[i];
+        gradient_b_v[i] = rho*gradient_b_v[i] + (1-rho)*grad_b*grad_b;
+        gradient_b[i] = (learn_rate / sqrt(gradient_b_v[i] + epsilon)) * grad_b;
+    }
+    for(j=0;j<h.size();j++){
+        double grad_c = Eh_data[j] - Eh[j];
+        gradient_c_v[j] = rho*gradient_c_v[j] + (1-rho)*grad_c*grad_c;
+        gradient_c[j] = (learn_rate / sqrt(gradient_c_v[j] + epsilon)) * grad_c;
+    }
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            double grad_w = Evh_data[i][j] - Evh[i][j];
+            gradient_w_v[i][j] = rho*gradient_w_v[i][j] + (1-rho)*grad_w*grad_w;
+            gradient_w[i][j] = (learn_rate / sqrt(gradient_w_v[i][j] + epsilon)) * grad_w;
+        }
+    }
+}
+
 // 可視変数の状態を2進数で返す関数
 int RBM::stateV(){
     int i;
@@ -698,7 +734,7 @@ void RBM::paramInit(int v_num, int h_num){
     }
 
     // 厳密計算とアニメーションに必要な変数
-    if(train_type == TrainType::exact || animete_type == AnimeteType::none){
+    if(train_type == TrainType::exact || animete_type == AnimeteType::anime){
         animeInit(v_num, h_num);
     }
 }
@@ -712,7 +748,7 @@ void RBM::animeInit(int v_num, int h_num){
 
 void RBM::setAnimeteType(AnimeteType type){
     this->animete_type = type;
-    if(animete_type == AnimeteType::none){
+    if(animete_type == AnimeteType::anime){
         animeInit(v.size(), h.size());
     }
 }
