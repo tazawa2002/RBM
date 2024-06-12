@@ -33,8 +33,11 @@ class RBM {
         enum class GradientType {
             nomal,
             momentum,
+            nesterov,
             adagrad,
-            rmsprop
+            rmsprop,
+            adadelta,
+            adam
         };
         enum class AnimeteType {
             anime, // アニメーションを実行する
@@ -81,8 +84,11 @@ class RBM {
         void data_expectation();
         void gradient_nomal(double learn_rate);
         void gradient_momentum(double learn_rate);
+        void gradient_nesterov(double learn_rate);
         void gradient_adagrad(double learn_rate);
         void gradient_rmsprop(double learn_rate);
+        void gradient_adadelta(double learn_rate);
+        void gradient_adam(double learn_rate, int loop_time);
         void train_anime(int loop_time, int skip);
 
         void print();

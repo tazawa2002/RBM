@@ -273,7 +273,10 @@ void RBM::train(int epoch){
     int i,j,k;
     int loop_time = 0;
     double learn_rate = 0.01;
-    double gradient = 10;
+    double gradient;
+    TrainType train_type = this->train_type;
+    GradientType gradient_type = this->gradient_type;
+    AnimeteType animete_type = this->animete_type;
     gradient_b.resize(v.size());
     gradient_c.resize(h.size());
     gradient_w.resize(v.size());
@@ -308,10 +311,12 @@ void RBM::train(int epoch){
 
     std::cout << "\e[?25l"; // カーソルを非表示
     while(loop_time < epoch){
-        if (train_type == TrainType::exact) {
-            exact_expectation();
-        } else if (train_type == TrainType::sampling) {
-            sampling_expectation(sampling_num);
+        if(gradient_type != GradientType::nesterov){
+            if (train_type == TrainType::exact) {
+                exact_expectation();
+            } else if (train_type == TrainType::sampling) {
+                sampling_expectation(sampling_num);
+            }
         }
         if(animete_type == AnimeteType::anime){
             train_anime(loop_time, 50);
@@ -323,10 +328,16 @@ void RBM::train(int epoch){
             gradient_nomal(learn_rate);
         }else if(gradient_type == GradientType::momentum){
             gradient_momentum(learn_rate);
+        }else if(gradient_type == GradientType::nesterov){
+            gradient_nesterov(learn_rate);
         }else if(gradient_type == GradientType::adagrad){
             gradient_adagrad(learn_rate);
         }else if(gradient_type == GradientType::rmsprop){
             gradient_rmsprop(learn_rate);
+        }else if(gradient_type == GradientType::adadelta){
+            gradient_adadelta(learn_rate);
+        }else if(gradient_type == GradientType::adam){
+            gradient_adam(learn_rate, loop_time);
         }
 
         // パラメータの更新
@@ -352,7 +363,7 @@ void RBM::train(int epoch){
 
         // 勾配を出力
         std::cout << "\r" << loop_time << ": " << gradient;
-        if(loop_time%100 == 0) fflush(stdout);
+        // if(loop_time%100 == 0) fflush(stdout);
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
     fflush(p);
@@ -540,6 +551,59 @@ void RBM::gradient_momentum(double learn_rate){
     }
 }
 
+void RBM::gradient_nesterov(double learn_rate){
+    int i, j;
+    double mu = 0.8;
+    static vector<double> grad_b_prev;
+    static vector<double> grad_c_prev;
+    static vector<vector<double>> grad_w_prev;
+
+    if (grad_b_prev.empty()) {
+        grad_b_prev.resize(v.size(), 0.0);
+        grad_c_prev.resize(h.size(), 0.0);
+        grad_w_prev.resize(v.size(), std::vector<double>(h.size(), 0.0));
+    }
+
+    // 一時的にパラメータを更新
+    for(i=0;i<v.size();i++){
+        b[i] += mu * grad_b_prev[i];
+    }
+    for(j=0;j<h.size();j++){
+        c[j] += mu * grad_c_prev[j];
+    }
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            W[i][j] += mu * grad_w_prev[i][j];
+        }
+    }
+
+    // 期待値を計算
+    if (train_type == TrainType::exact) {
+        exact_expectation();
+    } else if (train_type == TrainType::sampling) {
+        sampling_expectation(sampling_num);
+    }
+
+    // 予測された位置での勾配を計算
+    for(i=0;i<v.size();i++){
+        double grad_b = Ev_data[i] - Ev[i];
+        gradient_b[i] = mu * grad_b_prev[i] + (1 - mu) * learn_rate * grad_b;
+        grad_b_prev[i] = gradient_b[i]; // 更新された勾配を保存
+    }
+    for(j=0;j<h.size();j++){
+        double grad_c = Eh_data[j] - Eh[j];
+        gradient_c[j] = mu * grad_c_prev[j] + (1 - mu) * learn_rate * grad_c;
+        grad_c_prev[j] = gradient_c[j]; // 更新された勾配を保存
+    }
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            double grad_w = Evh_data[i][j] - Evh[i][j];
+            gradient_w[i][j] = mu * grad_w_prev[i][j] + (1 - mu) * learn_rate * grad_w;
+            grad_w_prev[i][j] = gradient_w[i][j]; // 更新された勾配を保存
+        }
+    }
+}
+
 void RBM::gradient_adagrad(double learn_rate){
     int i, j;
     double epsilon = 1e-8; // ゼロ除算を防ぐための小さな値
@@ -603,6 +667,108 @@ void RBM::gradient_rmsprop(double learn_rate){
             double grad_w = Evh_data[i][j] - Evh[i][j];
             gradient_w_v[i][j] = rho*gradient_w_v[i][j] + (1-rho)*grad_w*grad_w;
             gradient_w[i][j] = (learn_rate / sqrt(gradient_w_v[i][j] + epsilon)) * grad_w;
+        }
+    }
+}
+
+void RBM::gradient_adadelta(double learn_rate){
+    int i, j;
+    double epsilon = 1e-8; // ゼロ除算を防ぐための小さな値
+    double rho = 0.95;
+    static vector<double> gradient_b_v;
+    static vector<double> gradient_c_v;
+    static vector<vector<double>> gradient_w_v;
+    static vector<double> gradient_b_u;
+    static vector<double> gradient_c_u;
+    static vector<vector<double>> gradient_w_u;
+
+    // 勾配の二乗和を保持する配列が未定義の場合は初期化する
+    if (gradient_b_v.empty()) {
+        gradient_b_v.resize(v.size(), 0.0);
+        gradient_c_v.resize(h.size(), 0.0);
+        gradient_w_v.resize(v.size(), std::vector<double>(h.size(), 0.0));
+        gradient_b_u.resize(v.size(), 0.0);
+        gradient_c_u.resize(h.size(), 0.0);
+        gradient_w_u.resize(v.size(), std::vector<double>(h.size(), 0.0));
+    }
+
+    for(i=0;i<v.size();i++){
+        double grad_b = Ev_data[i] - Ev[i];
+        gradient_b_v[i] = rho*gradient_b_v[i] + (1-rho)*grad_b*grad_b;
+        gradient_b_u[i] = rho*gradient_b_u[i] + (1-rho)*gradient_b[i]*gradient_b[i];
+        gradient_b[i] = (sqrt(gradient_b_u[i] + epsilon) / sqrt(gradient_b_v[i] + epsilon)) * grad_b;
+    }
+    for(j=0;j<h.size();j++){
+        double grad_c = Eh_data[j] - Eh[j];
+        gradient_c_v[j] = rho*gradient_c_v[j] + (1-rho)*grad_c*grad_c;
+        gradient_c_u[j] = rho*gradient_c_u[j] + (1-rho)*gradient_c[j]*gradient_c[j];
+        gradient_c[j] = (sqrt(gradient_c_u[j] + epsilon) / sqrt(gradient_c_v[j] + epsilon)) * grad_c;
+    }
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            double grad_w = Evh_data[i][j] - Evh[i][j];
+            gradient_w_v[i][j] = rho*gradient_w_v[i][j] + (1-rho)*grad_w*grad_w;
+            gradient_w_u[i][j] = rho*gradient_w_u[i][j] + (1-rho)*gradient_w[i][j]*gradient_w[i][j];
+            gradient_w[i][j] = (sqrt(gradient_w_u[i][j] + epsilon) / sqrt(gradient_w_v[i][j] + epsilon)) * grad_w;
+        }
+    }
+}
+
+void RBM::gradient_adam(double learn_rate, int loop_time){
+    int i, j;
+    double epsilon = 1e-8; // ゼロ除算を防ぐための小さな値
+    double rho1 = 0.9;
+    double rho2 = 0.999;
+    static double rho1_t;
+    static double rho2_t;
+    static vector<double> gradient_b_v;
+    static vector<double> gradient_c_v;
+    static vector<vector<double>> gradient_w_v;
+    static vector<double> gradient_b_m;
+    static vector<double> gradient_c_m;
+    static vector<vector<double>> gradient_w_m;
+
+    // 勾配の二乗和を保持する配列が未定義の場合は初期化する
+    if (gradient_b_v.empty()) {
+        gradient_b_v.resize(v.size(), 0.0);
+        gradient_c_v.resize(h.size(), 0.0);
+        gradient_w_v.resize(v.size(), std::vector<double>(h.size(), 0.0));
+        gradient_b_m.resize(v.size(), 0.0);
+        gradient_c_m.resize(h.size(), 0.0);
+        gradient_w_m.resize(v.size(), std::vector<double>(h.size(), 0.0));
+    }
+    if(loop_time == 0){
+        rho1_t = 1;
+        rho2_t = 1;
+    }
+
+    rho1_t *= rho1;
+    rho2_t *= rho2;
+
+    for(i=0;i<v.size();i++){
+        double grad_b = Ev_data[i] - Ev[i];
+        gradient_b_v[i] = rho2*gradient_b_v[i] + (1-rho2)*grad_b*grad_b;
+        gradient_b_m[i] = rho1*gradient_b_m[i] + (1-rho1)*grad_b;
+        double v_hat = gradient_b_v[i] / (1-rho2_t);
+        double m_hat = gradient_b_m[i] / (1-rho1_t);
+        gradient_b[i] = learn_rate*m_hat / sqrt(v_hat + epsilon);
+    }
+    for(j=0;j<h.size();j++){
+        double grad_c = Eh_data[j] - Eh[j];
+        gradient_c_v[j] = rho2*gradient_c_v[j] + (1-rho2)*grad_c*grad_c;
+        gradient_c_m[j] = rho1*gradient_c_m[j] + (1-rho1)*grad_c;
+        double v_hat = gradient_c_v[j] / (1-rho2_t);
+        double m_hat = gradient_c_m[j] / (1-rho1_t);
+        gradient_c[j] = learn_rate*m_hat / sqrt(v_hat + epsilon);
+    }
+    for(i=0;i<v.size();i++){
+        for(j=0;j<h.size();j++){
+            double grad_w = Evh_data[i][j] - Evh[i][j];
+            gradient_w_v[i][j] = rho2*gradient_w_v[i][j] + (1-rho2)*grad_w*grad_w;
+            gradient_w_m[i][j] = rho1*gradient_w_m[i][j] + (1-rho1)*grad_w;
+            double v_hat = gradient_w_v[i][j] / (1-rho2_t);
+            double m_hat = gradient_w_m[i][j] / (1-rho1_t);
+            gradient_w[i][j] = learn_rate*m_hat / sqrt(v_hat + epsilon);
         }
     }
 }

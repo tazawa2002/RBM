@@ -102,6 +102,46 @@ int main(void){
     }
 
     for(i=0;i<learn_time;i++){
+        printf("\033[2Alearn time(nesterov): %d\033[0K\n", i+1);
+        gen = new RBM(n_v, n_h);
+        learn = new RBM(n_v, n_h);
+        gen->setTrainType(RBM::TrainType::exact);
+        learn->setAnimeteType(RBM::AnimeteType::anime);
+        learn->setTrainType(type);
+        learn->setSamplingNum(num);
+        learn->setGradientType(RBM::GradientType::nesterov);
+
+        gen->dataGen(num);
+        learn->dataRead(num);
+        learn->train(epoch);
+
+        delete gen;
+        delete learn;
+
+        file = fopen("./data/log_likelihood.dat", "r");
+        if(file == NULL){
+            printf("error: ./data/log_likelihood.dat\n");
+            exit(1);
+        }
+        for(j=0;j<epoch;j++){
+            fscanf(file, "%d %lf\n", &k, &log_likelihood[j]);
+            log_likelihood_sum[j] += log_likelihood[j];
+        }
+        fclose(file);
+    }
+
+    file = fopen("./data/log-likelihood-ave-nesterov.dat", "w");
+    for(i=0;i<epoch;i++){
+        fprintf(file, "%d %lf\n", i, log_likelihood_sum[i]/learn_time);
+    }
+    fclose(file);
+
+    for(i=0;i<epoch;i++){
+        log_likelihood_sum[i] = 0;
+        log_likelihood[i] = 0;
+    }
+
+    for(i=0;i<learn_time;i++){
         printf("\033[2Alearn time(AdGard): %d\033[0K\n", i+1);
         gen = new RBM(n_v, n_h);
         learn = new RBM(n_v, n_h);
@@ -171,6 +211,86 @@ int main(void){
     }
 
     file = fopen("./data/log-likelihood-ave-rmsprop.dat", "w");
+    for(i=0;i<epoch;i++){
+        fprintf(file, "%d %lf\n", i, log_likelihood_sum[i]/learn_time);
+    }
+    fclose(file);
+
+    for(i=0;i<epoch;i++){
+        log_likelihood_sum[i] = 0;
+        log_likelihood[i] = 0;
+    }
+
+    for(i=0;i<learn_time;i++){
+        printf("\033[2Alearn time(AdaDelta): %d\033[0K\n", i+1);
+        gen = new RBM(n_v, n_h);
+        learn = new RBM(n_v, n_h);
+        gen->setTrainType(RBM::TrainType::exact);
+        learn->setAnimeteType(RBM::AnimeteType::anime);
+        learn->setTrainType(type);
+        learn->setSamplingNum(num);
+        learn->setGradientType(RBM::GradientType::adadelta);
+
+        gen->dataGen(num);
+        learn->dataRead(num);
+        learn->train(epoch);
+
+        delete gen;
+        delete learn;
+
+        file = fopen("./data/log_likelihood.dat", "r");
+        if(file == NULL){
+            printf("error: ./data/log_likelihood.dat\n");
+            exit(1);
+        }
+        for(j=0;j<epoch;j++){
+            fscanf(file, "%d %lf\n", &k, &log_likelihood[j]);
+            log_likelihood_sum[j] += log_likelihood[j];
+        }
+        fclose(file);
+    }
+
+    file = fopen("./data/log-likelihood-ave-adadelta.dat", "w");
+    for(i=0;i<epoch;i++){
+        fprintf(file, "%d %lf\n", i, log_likelihood_sum[i]/learn_time);
+    }
+    fclose(file);
+
+    for(i=0;i<epoch;i++){
+        log_likelihood_sum[i] = 0;
+        log_likelihood[i] = 0;
+    }
+
+    for(i=0;i<learn_time;i++){
+        printf("\033[2Alearn time(Adam): %d\033[0K\n", i+1);
+        gen = new RBM(n_v, n_h);
+        learn = new RBM(n_v, n_h);
+        gen->setTrainType(RBM::TrainType::exact);
+        learn->setAnimeteType(RBM::AnimeteType::anime);
+        learn->setTrainType(type);
+        learn->setSamplingNum(num);
+        learn->setGradientType(RBM::GradientType::adam);
+
+        gen->dataGen(num);
+        learn->dataRead(num);
+        learn->train(epoch);
+
+        delete gen;
+        delete learn;
+
+        file = fopen("./data/log_likelihood.dat", "r");
+        if(file == NULL){
+            printf("error: ./data/log_likelihood.dat\n");
+            exit(1);
+        }
+        for(j=0;j<epoch;j++){
+            fscanf(file, "%d %lf\n", &k, &log_likelihood[j]);
+            log_likelihood_sum[j] += log_likelihood[j];
+        }
+        fclose(file);
+    }
+
+    file = fopen("./data/log-likelihood-ave-adam.dat", "w");
     for(i=0;i<epoch;i++){
         fprintf(file, "%d %lf\n", i, log_likelihood_sum[i]/learn_time);
     }
