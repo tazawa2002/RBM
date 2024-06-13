@@ -13,7 +13,7 @@ plot "./data/log-likelihood-ave-nomal.dat" w l linewidth 3 title "普通の勾�
      "./data/log-likelihood-ave-momentum.dat" w l linewidth 3 title "モーメンタム法", \
      "./data/log-likelihood-ave-nesterov.dat" w l linewidth 3 title "ネステロフ法", \
      "./data/log-likelihood-ave-adagrad.dat" w l linewidth 3 title "AdaGrad", \
-     "./data/log-likelihood-ave-rmsprop.dat" w l linewidth 3 title "RMSProp", \
+     "./data/log-likelihood-ave-rmsprop.dat" w l linewidth 3 title "RMSprop", \
      "./data/log-likelihood-ave-adadelta.dat" w l linewidth 3 title "AdaDelta", \
      "./data/log-likelihood-ave-adam.dat" w l linewidth 3 title "Adam"
 
@@ -33,7 +33,7 @@ plot "./data/log-likelihood-ave-nomal.dat" w l linewidth 3 title "普通の勾�
      "./data/log-likelihood-ave-momentum.dat" w l linewidth 3 title "モーメンタム法", \
      "./data/log-likelihood-ave-nesterov.dat" w l linewidth 3 title "ネステロフ法", \
      "./data/log-likelihood-ave-adagrad.dat" w l linewidth 3 title "AdaGrad", \
-     "./data/log-likelihood-ave-rmsprop.dat" w l linewidth 3 title "RMSProp", \
+     "./data/log-likelihood-ave-rmsprop.dat" w l linewidth 3 title "RMSprop", \
      "./data/log-likelihood-ave-adadelta.dat" w l linewidth 3 title "AdaDelta", \
      "./data/log-likelihood-ave-adam.dat" w l linewidth 3 title "Adam"
 
