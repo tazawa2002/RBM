@@ -363,11 +363,14 @@ void RBM::train(int epoch){
 
         // 勾配を出力
         std::cout << "\r" << loop_time << ": " << gradient;
-        // if(loop_time%100 == 0) fflush(stdout);
+        if(train_type == TrainType::sampling) fflush(stdout);
+        else if(loop_time%100==0) fflush(stdout);
     }
     std::cout << "\e[?25h" << endl; // カーソルの再表示
-    fflush(p);
-    fclose(p);
+    if(p!=NULL){
+        fflush(p);
+        fclose(p);
+    }
 }
 
 void RBM::train_anime(int loop_time, int skip){
@@ -442,13 +445,13 @@ void RBM::sampling_expectation(int num){
         }
     }
 
-    for(k=0;k<1000;k++){
+    for(k=0;k<10;k++){
         update_v();
         update_h();
     }
 
     for(k=0;k<num;k++){
-        for(l=0;l<10;l++) {
+        for(l=0;l<1;l++) {
             update_v();
             update_h();
         }

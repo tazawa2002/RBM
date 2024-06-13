@@ -61,7 +61,7 @@ class RBM {
         vector<double> p_distr_v;
         vector<int> histgram;
         vector<int> histgram_v;
-    private:
+    protected:
         vector<int> v;
         vector<int> h;
         vector<double> b;
