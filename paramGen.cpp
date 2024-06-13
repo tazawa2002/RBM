@@ -2,6 +2,7 @@
 
 int main(void){
     RBM rbm(5,5);
+    rbm.setTrainType(RBM::TrainType::exact);
     int num = 10000;
 
     // 可視変数のみの分布を計算
