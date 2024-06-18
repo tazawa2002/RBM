@@ -2,19 +2,20 @@
 
 int main(void){
     int n_v = 8;
-    int n_h = 30;
+    int n_h = 50;
     int num = 1000;
-    int epoch = 5000;
+    int epoch = 100;
     RBM rbm1(n_v, 50);
     RBM rbm2(n_v, 10);
     rbm2.setTrainType(RBM::TrainType::sampling);
-    rbm1.setAnimeteType(RBM::AnimeteType::none);
-    rbm2.setAnimeteType(RBM::AnimeteType::none);
+    rbm1.setAnimeteType(RBM::AnimeteType::anime);
+    rbm2.setAnimeteType(RBM::AnimeteType::anime);
     rbm2.sampling_num = num;
 
     rbm1.dataGen(num); // 訓練データを生成
     rbm2.dataRead(num); // 訓練データを読み込む
-    rbm2.train(epoch); // 訓練データを用いて学習
+    rbm2.trainMiniBatch(epoch, 100); // 訓練データを用いて学習
+    //rbm2.train(epoch);
 
     FILE *f;
     int i;
