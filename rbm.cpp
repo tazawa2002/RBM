@@ -316,6 +316,8 @@ void RBM::train(int epoch){
                 exact_expectation();
             } else if (train_type == TrainType::sampling) {
                 sampling_expectation(sampling_num);
+            } else if (train_type == TrainType::mean_field){
+                mean_field_expectation();
             }
         }
         if(animete_type == AnimeteType::anime){
@@ -430,6 +432,8 @@ void RBM::trainMiniBatch(int epoch, int mini_batch_size){
                     exact_expectation();
                 } else if (train_type == TrainType::sampling) {
                     sampling_expectation(sampling_num);
+                } else if (train_type == TrainType::mean_field){
+                    mean_field_expectation();
                 }
             }
 
@@ -597,6 +601,53 @@ void RBM::sampling_expectation(int num){
     for(i=0;i<v.size();i++){
         for(j=0;j<h.size();j++){
             Evh[i][j] /= num;
+        }
+    }
+}
+
+void RBM::mean_field_expectation(){
+    int i, j;
+    vector<double> v_mean(v.size()); // 可視層の平均場近似初期値
+    vector<double> h_mean(h.size()); // 隠れ層の平均場近似初期値
+
+    for(i=0;i<v_mean.size();i++){
+        v_mean[i] = random_num();
+    }
+    for(j=0;j<h_mean.size();j++){
+        h_mean[j] = random_num();
+    }
+
+    // 平均場近似の反復計算
+    for (int iter = 0; iter < 10000; iter++) {
+        // 可視層の平均を更新
+        for (i = 0; i < v.size(); i++) {
+            double sum = -b[i];
+            for (j = 0; j < h.size(); j++) {
+                sum -= W[i][j] * h_mean[j];
+            }
+            v_mean[i] = sig(sum);
+        }
+
+        // 隠れ層の平均を更新
+        for (j = 0; j < h.size(); j++) {
+            double sum = -c[j];
+            for (i = 0; i < v.size(); i++) {
+                sum -= W[i][j] * v_mean[i];
+            }
+            h_mean[j] = sig(sum);
+        }
+    }
+
+    // 平均場近似による期待値の計算
+    for (i = 0; i < v.size(); i++) {
+        Ev[i] = v_mean[i];
+    }
+    for (j = 0; j < h.size(); j++) {
+        Eh[j] = h_mean[j];
+    }
+    for (i = 0; i < v.size(); i++) {
+        for (j = 0; j < h.size(); j++) {
+            Evh[i][j] = v_mean[i] * h_mean[j];
         }
     }
 }
