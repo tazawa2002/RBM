@@ -9,18 +9,17 @@ x = STATS_records
 stats './data/histgram.dat' using 2
 ymax2 = STATS_max
 
-ymax = ymax1 > ymax2 ? ymax1 : ymax2
-
 unset key
 set multiplot layout 1,2
 set xrange[-0.5:x-0.5]
-set yrange[0:ymax*1.1]
 set xlabel "状態"
 set ylabel "確率"
 
+set yrange[0:ymax1*1.1]
 set title "RBMの確率分布"
 plot "./data/p_distr.dat" smooth freq with boxes fill solid lc rgb "#006400"
 
+set yrange[0:ymax2*1.1]
 set title "RBMのサンプリング結果"
 plot "./data/histgram.dat" smooth freq with boxes fill solid lc rgb "#006400"
 

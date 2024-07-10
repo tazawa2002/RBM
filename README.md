@@ -19,21 +19,48 @@
     - paramRead.plt：paramRead.cpp用のgnuplotのスクリプト
 
 # 実行方法
-## サンプリングの実行
+
+## コンパイル方法
+以下のコマンドを実行すると実行ファイルが作成される
 ```shell
 make
+```
+
+## サンプリングの実行
+サンプリングの実行結果を表示する. `graph/graph.pdf`が生成される. 
+```shell
 ./main
-gnuplot graph.plt
+gnuplot ./plt/graph.plt
 ```
 
 ## 学習の実行
+学習を実行する. `graph/learn.pdf`が生成される. 
 ```shell
-make
 ./learn
-gnuplot learn.plt
+gnuplot ./plt/learn.plt
 ```
 
-## 注意点
-リポジトリにgraphとdataという名前のディレクトリを作成しないと実行したときエラーになる
+## 学習のアニメーション
+学習のアニメーションファイルを作成する. `graph/learn-anime.gif`が生成される. 
+```shell
+./learn
+gnuplot ./plt/learn-anime.plt
+```
 
+## 学習の実行(PCD法で期待値計算)
+学習を実行する. `graph/learn.pdf`が生成される. 
+```shell
+./learn
+gnuplot ./plt/learn.plt
+```
+
+## 学習のアニメーション(PCD法で期待値計算)
+学習のアニメーションファイルを作成する. `graph/learn-anime.gif`が生成される. 
+```shell
+./learn
+gnuplot ./plt/learn-anime.plt
+```
+
+
+# 注意点
 VL-PGothicというフォントがないとpdfの出力結果がおかしくなる
