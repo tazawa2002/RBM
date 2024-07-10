@@ -99,6 +99,7 @@ class RBM {
         void gradient_rmsprop(double learn_rate);
         void gradient_adadelta(double learn_rate);
         void gradient_adam(double learn_rate, int loop_time);
+        void sampling_anime(int loop_time, int skip);
         void train_anime(int loop_time, int skip);
 
         void print();

@@ -177,6 +177,26 @@ void RBM::sampling(int num){
             update_h();
         }
         histgram_v[stateV()] += 1;
+        sampling_anime(i, 10);
+    }
+}
+
+void RBM::sampling_anime(int loop_time, int skip){
+    // アニメーション用のファイルを出力
+    int i;
+    char filename[100];
+    FILE *p;
+    if(loop_time%skip == 0){
+        snprintf(filename, sizeof(filename), "./data/sampling-%03d.dat", loop_time/skip);
+        p = fopen(filename, "w");
+        if (p != NULL) {
+            for(i=0;i<vStates;i++){
+                fprintf(p, "%d %d\n", i, histgram_v[i]);
+            }
+            fclose(p);
+        } else {
+            perror("Error opening p");
+        }
     }
 }
 
@@ -321,7 +341,7 @@ void RBM::train(int epoch){
             }
         }
         if(animete_type == AnimeteType::anime){
-            train_anime(loop_time, 50);
+            train_anime(loop_time, 10);
             fprintf(p, "%d %lf\n", loop_time, log_likelihood());
         }
 
@@ -655,8 +675,8 @@ void RBM::mean_field_expectation(){
 void RBM::data_expectation(){
     int i, j, k;
     double lambda;
-    vector<double> sig_lambda;
-    sig_lambda.resize(traindatanum);
+    vector<vector<double>> sig_lambda;
+    sig_lambda.resize(traindatanum, vector<double>(h.size(), 0.0));
 
     for(i=0;i<v.size();i++){
         // v_iのデータ平均を求める処理
@@ -675,8 +695,8 @@ void RBM::data_expectation(){
             for(i=0;i<v.size();i++){
                 lambda += W[i][j]*traindata[k][i];
             }
-            sig_lambda[k] = sig(lambda);
-            Eh_data[j] += sig_lambda[k];
+            sig_lambda[k][j] = sig(lambda);
+            Eh_data[j] += sig_lambda[k][j];
         }
         Eh_data[j] /= traindatanum;
 
@@ -684,7 +704,7 @@ void RBM::data_expectation(){
             // vhのデータ平均を求める処理
             Evh_data[i][j] = 0;
             for(k=0;k<traindatanum;k++){
-                Evh_data[i][j] += traindata[k][i]*sig_lambda[k];
+                Evh_data[i][j] += traindata[k][i]*sig_lambda[k][j];
             }
             Evh_data[i][j] /= traindatanum;
         }
