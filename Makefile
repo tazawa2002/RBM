@@ -1,4 +1,4 @@
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++11 -O2
 
 all: main learn paramGen paramRead log-likelihood
 
