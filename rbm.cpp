@@ -328,6 +328,7 @@ void RBM::train(int epoch){
 
     // 訓練データの期待値を計算
     data_expectation();
+    printf("after data_expectation aiueoaiueoaiueo");
 
     std::cout << "\e[?25l"; // カーソルを非表示
     while(loop_time < epoch){
@@ -586,13 +587,13 @@ void RBM::sampling_expectation(int num){
         }
     }
 
-    for(k=0;k<10;k++){
-        update_v();
+    for(k=0;k<traindatanum;k++){
+        for(l=0;l<v.size();l++){
+            v[l] = traindata[k][l];
+        }
         update_h();
-    }
 
-    for(k=0;k<num;k++){
-        for(l=0;l<1;l++) {
+        for(l=0;l<5;l++){
             update_v();
             update_h();
         }
@@ -613,14 +614,14 @@ void RBM::sampling_expectation(int num){
 
     // データ数で割る
     for(i=0;i<v.size();i++){
-        Ev[i] /= num;
+        Ev[i] /= traindatanum;
     }
     for(j=0;j<h.size();j++){
-        Eh[j] /= num;
+        Eh[j] /= traindatanum;
     }
     for(i=0;i<v.size();i++){
         for(j=0;j<h.size();j++){
-            Evh[i][j] /= num;
+            Evh[i][j] /= traindatanum;
         }
     }
 }
@@ -678,9 +679,12 @@ void RBM::data_expectation(){
     vector<vector<double>> sig_lambda;
     sig_lambda.resize(traindatanum, vector<double>(h.size(), 0.0));
 
+    Ev_data.resize(v.size(), 0.0);
+    Eh_data.resize(h.size(), 0.0);
+    Evh_data.resize(v.size(), vector<double>(h.size(), 0.0));
+
     for(i=0;i<v.size();i++){
         // v_iのデータ平均を求める処理
-        Ev_data[i] = 0;
         for(k=0;k<traindatanum;k++){
             Ev_data[i] += traindata[k][i];
         }
@@ -688,7 +692,6 @@ void RBM::data_expectation(){
     }
     for(j=0;j<h.size();j++){
         // h_iのデータ平均を求める処理
-        Eh_data[j] = 0;
         for(k=0;k<traindatanum;k++){
             // lambdaを計算する
             lambda = c[j];
@@ -702,7 +705,6 @@ void RBM::data_expectation(){
 
         for(i=0;i<v.size();i++){
             // vhのデータ平均を求める処理
-            Evh_data[i][j] = 0;
             for(k=0;k<traindatanum;k++){
                 Evh_data[i][j] += traindata[k][i]*sig_lambda[k][j];
             }

@@ -6,11 +6,10 @@ int main(void){
     int epoch = 1000;
     RBM rbm1(n_v, 10);
     RBM rbm2(n_v, 50);
-    rbm2.setTrainType(RBM::TrainType::exact);
+    rbm2.setTrainType(RBM::TrainType::sampling);
     rbm1.setAnimeteType(RBM::AnimeteType::anime);
     rbm2.setAnimeteType(RBM::AnimeteType::anime);
     rbm2.setGradientType(RBM::GradientType::nomal);
-    rbm2.sampling_num = num;
 
     rbm1.dataGen(num); // 訓練データを生成
     rbm2.dataRead(num); // 訓練データを読み込む
