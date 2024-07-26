@@ -30,6 +30,7 @@ class RBM {
         void trainMiniBatch(int epoch, int mini_batch_size);
         int traindatanum;
         vector< vector<int> > traindata;
+        vector<vector<int>> sample_point;
         void paramOutput();
         void paramInput();
         void paramPrint();
@@ -49,6 +50,7 @@ class RBM {
         };
         enum class AnimeteType {
             anime, // アニメーションを実行する
+            loglikelihood, // 対数尤度のみ記録
             none // アニメーションを実行しない
         };
         TrainType train_type; // 訓練のタイプ
@@ -69,6 +71,7 @@ class RBM {
         vector<double> p_distr_v;
         vector<int> histgram;
         vector<int> histgram_v;
+        vector<double> loglikelihood;
     protected:
         vector<int> v;
         vector<int> h;

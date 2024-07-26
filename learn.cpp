@@ -7,8 +7,8 @@ int main(void){
     RBM rbm1(n_v, 10);
     RBM rbm2(n_v, 50);
     rbm2.setTrainType(RBM::TrainType::sampling);
-    rbm1.setAnimeteType(RBM::AnimeteType::anime);
-    rbm2.setAnimeteType(RBM::AnimeteType::anime);
+    rbm1.setAnimeteType(RBM::AnimeteType::loglikelihood);
+    rbm2.setAnimeteType(RBM::AnimeteType::loglikelihood);
     rbm2.setGradientType(RBM::GradientType::nomal);
 
     rbm1.dataGen(num); // 訓練データを生成

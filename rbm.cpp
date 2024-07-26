@@ -162,6 +162,7 @@ void RBM::update_h(){
 // サンプリング
 void RBM::sampling(int num){
     int i, j;
+    AnimeteType animete_type = this->animete_type;
     for(i=0;i<vStates;i++){
         histgram_v[i] = 0;
     }
@@ -177,6 +178,7 @@ void RBM::sampling(int num){
             update_h();
         }
         histgram_v[stateV()] += 1;
+        if(animete_type == AnimeteType::anime)
         sampling_anime(i, 10);
     }
 }
@@ -316,7 +318,7 @@ void RBM::train(int epoch){
     }
 
     FILE *p = NULL;
-    if(animete_type == AnimeteType::anime){
+    if(animete_type != AnimeteType::none){
         animeInit(v.size(), h.size());
         // 対数尤度関数の出力ファイルの準備
         p = fopen("./data/log_likelihood.dat", "w");
@@ -328,7 +330,6 @@ void RBM::train(int epoch){
 
     // 訓練データの期待値を計算
     data_expectation();
-    printf("after data_expectation aiueoaiueoaiueo");
 
     std::cout << "\e[?25l"; // カーソルを非表示
     while(loop_time < epoch){
@@ -343,6 +344,9 @@ void RBM::train(int epoch){
         }
         if(animete_type == AnimeteType::anime){
             train_anime(loop_time, 10);
+            fprintf(p, "%d %lf\n", loop_time, log_likelihood());
+        }
+        if(animete_type == AnimeteType::loglikelihood){
             fprintf(p, "%d %lf\n", loop_time, log_likelihood());
         }
 
@@ -383,6 +387,9 @@ void RBM::train(int epoch){
         }
         gradient = sqrt(gradient);
         loop_time++;
+        if(animete_type != AnimeteType::none){
+            p_distr_v_calc();
+        }
 
         // 勾配を出力
         std::cout << "\r" << loop_time << ": " << gradient;
@@ -425,7 +432,7 @@ void RBM::trainMiniBatch(int epoch, int mini_batch_size){
     }
 
     FILE *p = NULL;
-    if(animete_type == AnimeteType::anime){
+    if(animete_type != AnimeteType::none){
         // 対数尤度関数の出力ファイルの準備
         p = fopen("./data/log_likelihood.dat", "w");
         if(p == NULL){
@@ -460,6 +467,9 @@ void RBM::trainMiniBatch(int epoch, int mini_batch_size){
 
             if(animete_type == AnimeteType::anime){
                 train_anime(loop_time*num_batchs+batch_index, 50);
+                fprintf(p, "%d %lf\n", loop_time*num_batchs+batch_index, log_likelihood());
+            }
+            if(animete_type == AnimeteType::loglikelihood){
                 fprintf(p, "%d %lf\n", loop_time*num_batchs+batch_index, log_likelihood());
             }
             
@@ -501,6 +511,10 @@ void RBM::trainMiniBatch(int epoch, int mini_batch_size){
                 }
             }
             gradient = sqrt(gradient);
+            if(animete_type != AnimeteType::none){
+                p_distr_v_calc();
+            }
+
             // 勾配を出力
             std::cout << "\repoch: " << loop_time << ", batch: " << batch_index << ", gradient: " << gradient;
             if(train_type == TrainType::sampling) fflush(stdout);
@@ -520,7 +534,6 @@ void RBM::train_anime(int loop_time, int skip){
     int i;
     char filename[100];
     FILE *p;
-    p_distr_v_calc();
     if(loop_time%skip == 0){
         snprintf(filename, sizeof(filename), "./data/learn-v-%03d.dat", loop_time/skip);
         p = fopen(filename, "w");
@@ -574,6 +587,15 @@ void RBM::exact_expectation(){
 
 void RBM::sampling_expectation(int num){
     int i, j, k, l;
+
+    if(sample_point.empty()){
+        sample_point.resize(traindatanum, vector<int>(v.size(), 0));
+        for(k=0;k<traindatanum;k++){
+            for(i=0;i<v.size();i++){
+                sample_point[k][i] = traindata[k][i];
+            }
+        }
+    }
     
     for(i=0;i<v.size();i++){
         Ev[i] = 0;
@@ -588,14 +610,18 @@ void RBM::sampling_expectation(int num){
     }
 
     for(k=0;k<traindatanum;k++){
-        for(l=0;l<v.size();l++){
-            v[l] = traindata[k][l];
+        for(i=0;i<v.size();i++){
+            v[i] = sample_point[k][i];
         }
         update_h();
 
         for(l=0;l<5;l++){
             update_v();
             update_h();
+        }
+
+        for(i=0;i<v.size();i++){
+            sample_point[k][i] = v[i];
         }
         
         // 期待値を足す
@@ -1142,7 +1168,7 @@ void RBM::paramInit(int v_num, int h_num){
     }
 
     // 厳密計算とアニメーションに必要な変数
-    if(train_type == TrainType::exact || animete_type == AnimeteType::anime){
+    if(train_type == TrainType::exact || animete_type != AnimeteType::none){
         animeInit(v_num, h_num);
     }
 }
@@ -1156,8 +1182,9 @@ void RBM::animeInit(int v_num, int h_num){
 
 void RBM::setAnimeteType(AnimeteType type){
     this->animete_type = type;
-    if(animete_type == AnimeteType::anime){
+    if(animete_type != AnimeteType::none){
         animeInit(v.size(), h.size());
+        p_distr_v_calc();
     }
 }
 
@@ -1188,5 +1215,6 @@ double RBM::log_likelihood(){
         }
         log_likelihood += log(p_distr_v[state]);
     }
+    loglikelihood.push_back(log_likelihood / traindatanum);
     return log_likelihood / traindatanum;
 }
