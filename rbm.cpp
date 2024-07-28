@@ -162,7 +162,11 @@ void RBM::update_h(){
 // サンプリング
 void RBM::sampling(int num){
     int i, j;
+    double KL;
+    int flag;
     AnimeteType animete_type = this->animete_type;
+    FILE *fp;
+    fp = fopen("./data/KL.dat", "w");
     for(i=0;i<vStates;i++){
         histgram_v[i] = 0;
     }
@@ -178,9 +182,29 @@ void RBM::sampling(int num){
             update_h();
         }
         histgram_v[stateV()] += 1;
-        if(animete_type == AnimeteType::anime)
-        sampling_anime(i, 10);
+        if(animete_type == AnimeteType::anime){
+            // sampling_anime(i, 10);
+
+            flag = 1;
+            for(j=0;j<vStates;j++){
+                if(histgram_v[j]==0){
+                    flag = 0;
+                    break;
+                }
+            }
+            if(flag){
+                KL = 0;
+                for(j=0;j<vStates;j++){
+                    KL += p_distr_v[j]*log((i+1)*p_distr_v[j]/histgram_v[j]);
+                    // KL += histgram_v[j]*log(histgram_v[j]/((i+1)*p_distr_v[j]));
+                }
+                fprintf(fp, "%d %lf\n", i, KL);
+                printf("%d % lf\n", i, KL);
+            }
+        }
     }
+
+    fclose(fp);
 }
 
 void RBM::sampling_anime(int loop_time, int skip){

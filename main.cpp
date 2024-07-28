@@ -2,11 +2,11 @@
 #include <stdio.h>
 
 int main(void){
-    RBM rbm(8,10);
+    RBM rbm(5,30);
     rbm.setTrainType(RBM::TrainType::exact);
     rbm.setAnimeteType(RBM::AnimeteType::anime);
     rbm.setAnimeteType(RBM::AnimeteType::anime);
-    int num = 1000;
+    int num = 10000;
     rbm.p_distr_v_calc();
 
     rbm.sampling(num);
