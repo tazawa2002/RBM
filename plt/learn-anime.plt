@@ -25,26 +25,26 @@ file_count = system("ls ./data/learn-v-*.dat | wc -l")
 file_count = int(file_count)
 
 do for [i=0:file_count-1]{
-    set multiplot layout 2,2
-    set xlabel "状態"
-    set ylabel "確率"
+    set multiplot layout 1,2
+    set xlabel "State"
+    set ylabel "Probability"
     set xrange [-0.5:x-0.5]
     set yrange[0:ymax_p*1.1]
 
-    set title "生成モデルの確率分布"
+    set title "Probability Distribution of Generative Model"
     plot "./data/rbm1_p.dat" with boxes fill solid lc rgb "#006400"
 
-    set title "学習モデルの確率分布"
+    set title "Probability Distribution of Learning Model"
     plot sprintf("./data/learn-v-%03d.dat", i) with boxes fill solid lc rgb "#006400"
 
-    set ylabel "出現回数"
-    set title "生成モデルのサンプリング結果"
-    set yrange[0:ymax_q*1.1]
-    plot "./data/rbm1_q.dat" with boxes fill solid lc rgb "#006400"
-    # plot "./data/data.dat" smooth freq with boxes fill solid
+    # set ylabel "Frequency"
+    # set title "Sampling Results of Generative Model"
+    # set yrange[0:ymax_q*1.1]
+    # plot "./data/rbm1_q.dat" with boxes fill solid lc rgb "#006400"
+    # # plot "./data/data.dat" smooth freq with boxes fill solid
 
-    set title "学習モデルのサンプリング結果"
-    plot "./data/rbm2_q.dat" with boxes fill solid lc rgb "#006400"
+    # set title "Sampling Results of Learning Model"
+    # plot "./data/rbm2_q.dat" with boxes fill solid lc rgb "#006400"
 
     unset multiplot
 }
